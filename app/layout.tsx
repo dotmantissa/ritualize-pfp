@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Ritual | Meme Generator",
+  title: "Ritual | PFP Generator",
   description: "Custom Web3 Character Meme Generator",
 };
 
