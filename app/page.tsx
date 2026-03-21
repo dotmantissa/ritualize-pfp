@@ -2,9 +2,9 @@
 
 import { useState, useRef, useMemo } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Plus, Type, Trash2, Search } from 'lucide-react';
+import { Download, Plus, Type, Trash2, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
-// The Geometric Knot SVG Component
+// --- ICONS & SVGS ---
 const RitualKnot = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path d="M25 25h15v15H25zM60 25h15v15H60zM25 60h15v15H25zM60 60h15v15H60z" fill="currentColor"/>
@@ -21,21 +21,26 @@ const MOCK_TEMPLATES = [
   { id: '4', url: 'https://placehold.co/800x600/18181b/22c55e?text=Cozy+Frog', name: 'Cozy Frog' },
 ];
 
-export default function MemeEditor() {
+export default function App() {
+  const [view, setView] = useState<'landing' | 'editor'>('landing');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTemplateId, setSelectedTemplateId] = useState(MOCK_TEMPLATES[0].id);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  
   const [texts, setTexts] = useState([
     { id: 1, content: 'TOP TEXT', top: 10, left: 50, size: 48 }
   ]);
   const memeRef = useRef<HTMLDivElement>(null);
 
+  // --- LOGIC ---
   const selectedTemplate = useMemo(() => 
     MOCK_TEMPLATES.find(t => t.id === selectedTemplateId) || MOCK_TEMPLATES[0]
   , [selectedTemplateId]);
 
-  const filteredTemplates = useMemo(() => 
-    MOCK_TEMPLATES.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  , [searchQuery]);
+  const handleSelectTemplate = (id: string) => {
+    if (!id) return;
+    setSelectedTemplateId(id);
+    setView('editor'); // Instantly jump to editor when a template is picked
+  };
 
   const addText = () => {
     setTexts([...texts, { id: Date.now(), content: 'NEW TEXT', top: 50, left: 50, size: 48 }]);
@@ -63,166 +68,199 @@ export default function MemeEditor() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden font-sans flex flex-col">
-      
-      {/* --- BACKGROUND PATTERNS --- */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <RitualKnot className="absolute -bottom-32 -left-32 w-[600px] h-[600px] text-[#10b981] opacity-90 transform rotate-45" />
-        <RitualKnot className="absolute -top-32 -right-32 w-[500px] h-[500px] text-white opacity-90 transform rotate-45" />
-        <RitualKnot className="absolute bottom-10 right-20 w-[300px] h-[300px] text-white opacity-90 transform rotate-45" />
-      </div>
-
-      {/* --- TOP NAVIGATION BAR --- */}
-      <header className="w-full bg-[#10b981] text-black px-6 py-3 flex items-center z-20 relative">
-        <div className="flex items-center gap-3 font-bold text-xl tracking-wide">
-          <RitualKnot className="w-6 h-6 text-black" />
-          <span>Ritual <span className="font-normal opacity-80 mx-2">|</span> Meme Generator</span>
-        </div>
-      </header>
-
-      {/* --- MAIN WORKSPACE --- */}
-      <main className="flex-1 relative z-10 flex flex-col p-8 md:p-12">
+  // ==========================================
+  // VIEW 1: THE LANDING PAGE (Exact Mockup Match)
+  // ==========================================
+  if (view === 'landing') {
+    return (
+      <div className="min-h-screen bg-black relative overflow-hidden font-sans">
         
-        {/* Search & Select Controls */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-4xl">
-          <select 
-            value={selectedTemplateId}
-            onChange={(e) => setSelectedTemplateId(e.target.value)}
-            className="bg-white text-black px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] cursor-pointer min-w-[200px]"
-          >
-            {MOCK_TEMPLATES.map(tpl => (
-              <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-            ))}
-          </select>
+        {/* Background Patterns */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <RitualKnot className="absolute -bottom-32 -left-32 w-[600px] h-[600px] text-[#22c55e] transform rotate-45" />
+          <RitualKnot className="absolute -top-32 -right-32 w-[500px] h-[500px] text-white transform rotate-45" />
+          <RitualKnot className="absolute -bottom-10 right-20 w-[300px] h-[300px] text-white transform rotate-45" />
+        </div>
 
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={20} />
+        {/* Top Green Bar */}
+        <header className="w-full bg-[#22c55e] px-6 py-3 flex items-center z-20 relative">
+          <div className="flex items-center gap-2 text-xl tracking-tight">
+            <RitualKnot className="w-6 h-6 text-black" />
+            <span className="font-bold text-black">Ritual</span>
+            <span className="text-white mx-1">|</span>
+            <span className="text-white">Meme Generator</span>
+          </div>
+        </header>
+
+        {/* Center Controls */}
+        <main className="relative z-10 flex flex-col items-center justify-center min-h-[70vh] px-4">
+          <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-2xl">
+            
+            {/* White Dropdown */}
+            <select 
+              value={selectedTemplateId}
+              onChange={(e) => handleSelectTemplate(e.target.value)}
+              className="bg-white text-black px-4 py-3 min-w-[200px] focus:outline-none appearance-none cursor-pointer font-medium"
+              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .7rem top 50%', backgroundSize: '.65rem auto' }}
+            >
+              <option value="" disabled>Choose Template</option>
+              {MOCK_TEMPLATES.map(tpl => (
+                <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+              ))}
+            </select>
+
+            {/* Dark Search Bar */}
             <input 
               type="text" 
               placeholder="Search Template..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent border border-white/30 text-white placeholder:text-white/50 px-10 py-2 text-lg focus:outline-none focus:border-[#10b981] transition-colors"
+              className="flex-1 bg-black/50 border border-[#22c55e] text-white placeholder:text-gray-400 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-[#22c55e] w-full md:w-auto"
             />
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="absolute bottom-6 right-8 text-white text-sm z-20 font-medium">
+          Built by: Mantissa &nbsp;|&nbsp; X, Discord: @dotmantissa
+        </footer>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // VIEW 2: THE EDITOR WORKSPACE
+  // ==========================================
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans">
+      
+      {/* Editor Header */}
+      <header className="w-full bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex justify-between items-center z-20">
+        <button 
+          onClick={() => setView('landing')}
+          className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span className="font-medium">Back to Templates</span>
+        </button>
+        <div className="flex items-center gap-2 text-[#22c55e] font-bold">
+          <ImageIcon size={20} />
+          <span>Editing: {selectedTemplate.name}</span>
+        </div>
+      </header>
+
+      {/* Workspace Area */}
+      <main className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-65px)] overflow-hidden">
+        
+        {/* Canvas Area */}
+        <div className="flex-1 bg-zinc-950 flex items-center justify-center p-8 relative overflow-y-auto">
+          {/* Subtle Grid */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          
+          <div 
+            ref={memeRef} 
+            className="relative bg-black ring-1 ring-white/10 shadow-2xl z-10 w-full max-w-3xl"
+          >
+            <img 
+              src={selectedTemplate.url} 
+              alt="Meme base" 
+              className="w-full h-auto block pointer-events-none"
+            />
+            
+            {texts.map((text) => (
+              <div
+                key={text.id}
+                className="absolute text-center w-full select-none"
+                style={{ 
+                  top: `${text.top}%`, 
+                  left: `${text.left}%`, 
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <h1 
+                  className="uppercase font-black text-white tracking-wide leading-tight"
+                  style={{ 
+                    fontSize: `${text.size}px`,
+                    WebkitTextStroke: `${Math.max(2, text.size / 16)}px black`, 
+                    textShadow: '3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
+                    paintOrder: 'stroke fill'
+                  }}
+                >
+                  {text.content}
+                </h1>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Editor Area */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-12 items-start">
-          
-          {/* Left: Canvas */}
-          <div className="flex-1 flex justify-center w-full">
-            <div 
-              ref={memeRef} 
-              className="relative w-full max-w-2xl bg-black border border-white/10 shadow-2xl overflow-hidden"
+        {/* Control Panel */}
+        <aside className="w-full lg:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col h-full shadow-2xl z-20">
+          <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white">Text Layers</h2>
+            <button 
+              onClick={addText}
+              className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-sm font-medium rounded-lg transition-colors border border-zinc-700"
             >
-              <img 
-                src={selectedTemplate.url} 
-                alt="Meme base" 
-                className="w-full h-auto block pointer-events-none"
-              />
-              
-              {/* Overlay Texts */}
-              {texts.map((text) => (
-                <div
-                  key={text.id}
-                  className="absolute text-center w-full select-none"
-                  style={{ 
-                    top: `${text.top}%`, 
-                    left: `${text.left}%`, 
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  <h1 
-                    className="uppercase font-black text-white tracking-wide leading-tight"
-                    style={{ 
-                      fontSize: `${text.size}px`,
-                      WebkitTextStroke: `${Math.max(2, text.size / 16)}px black`, 
-                      textShadow: '3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
-                      paintOrder: 'stroke fill'
-                    }}
-                  >
-                    {text.content}
-                  </h1>
-                </div>
-              ))}
-            </div>
+              <Plus size={16} /> Add Text
+            </button>
           </div>
 
-          {/* Right: Floating Control Panel */}
-          <div className="w-full lg:w-96 bg-black/60 backdrop-blur-xl border border-white/10 p-6 shadow-2xl flex flex-col max-h-[70vh]">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-[#10b981]">Layers</h2>
-              <button 
-                onClick={addText}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors border border-white/10"
-              >
-                <Plus size={16} /> Add Text
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar mb-6">
-              {texts.map((text, index) => (
-                <div key={text.id} className="p-4 bg-white/5 border border-white/10 space-y-4 relative group">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-2">
-                      <Type size={14} /> Layer {index + 1}
-                    </label>
-                    <button 
-                      onClick={() => removeText(text.id)}
-                      className="text-white/30 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
-                  <input
-                    type="text"
-                    value={text.content}
-                    onChange={(e) => updateText(text.id, 'content', e.target.value)}
-                    className="w-full bg-black/50 border border-white/20 p-2 text-white focus:outline-none focus:border-[#10b981] transition-all font-medium"
-                    placeholder="Enter meme text..."
-                  />
-
-                  {/* Sliders */}
-                  <div className="space-y-2 pt-2">
-                    {[
-                      { label: 'Size', field: 'size', min: 16, max: 120 },
-                      { label: 'Pos Y', field: 'top', min: 0, max: 100 },
-                      { label: 'Pos X', field: 'left', min: 0, max: 100 }
-                    ].map(({ label, field, min, max }) => (
-                      <div key={field} className="flex items-center gap-3">
-                        <span className="text-xs text-white/50 w-8">{label}</span>
-                        <input 
-                          type="range" min={min} max={max} 
-                          value={text[field as keyof typeof text]} 
-                          onChange={(e) => updateText(text.id, field, Number(e.target.value))}
-                          className="flex-1 accent-[#10b981] h-1 bg-white/20 appearance-none cursor-pointer" 
-                        />
-                      </div>
-                    ))}
-                  </div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {texts.map((text, index) => (
+              <div key={text.id} className="p-4 bg-zinc-950 border border-zinc-800 rounded-xl space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs text-[#22c55e] font-bold uppercase flex items-center gap-2">
+                    <Type size={14} /> Layer {index + 1}
+                  </label>
+                  <button 
+                    onClick={() => removeText(text.id)}
+                    className="text-zinc-600 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-              ))}
-            </div>
 
+                <input
+                  type="text"
+                  value={text.content}
+                  onChange={(e) => updateText(text.id, 'content', e.target.value)}
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-[#22c55e] transition-all"
+                />
+
+                <div className="space-y-3 pt-2">
+                  {[
+                    { label: 'Size', field: 'size', min: 16, max: 120 },
+                    { label: 'Pos Y', field: 'top', min: 0, max: 100 },
+                    { label: 'Pos X', field: 'left', min: 0, max: 100 }
+                  ].map(({ label, field, min, max }) => (
+                    <div key={field} className="flex items-center gap-3">
+                      <span className="text-xs text-zinc-500 w-10">{label}</span>
+                      <input 
+                        type="range" min={min} max={max} 
+                        value={text[field as keyof typeof text]} 
+                        onChange={(e) => updateText(text.id, field, Number(e.target.value))}
+                        className="flex-1 accent-[#22c55e] h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer" 
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950">
             <button 
               onClick={exportMeme}
               disabled={texts.length === 0}
-              className="w-full py-4 bg-[#10b981] hover:bg-[#0ea5e9] text-black font-black flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-[#22c55e] hover:bg-[#1ea550] text-black font-black rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
             >
               <Download size={20} />
-              GENERATE
+              GENERATE MEME
             </button>
           </div>
-        </div>
-      </main>
+        </aside>
 
-      {/* --- FOOTER --- */}
-      <footer className="absolute bottom-6 right-8 text-white/70 text-sm font-medium z-20">
-        Built by: Mantissa | X, Discord: @dotmantissa
-      </footer>
+      </main>
     </div>
   );
 }
