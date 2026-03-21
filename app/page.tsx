@@ -1,8 +1,18 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, Plus, Type, Trash2, Image as ImageIcon, Settings2 } from 'lucide-react';
+import { Download, Plus, Type, Trash2, Search } from 'lucide-react';
+
+// The Geometric Knot SVG Component
+const RitualKnot = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M25 25h15v15H25zM60 25h15v15H60zM25 60h15v15H25zM60 60h15v15H60z" fill="currentColor"/>
+    <path fillRule="evenodd" clipRule="evenodd" d="M40 10h20v15H40V10zm0 65h20v15H40V75zM10 40h15v20H10V40zm65 0h15v20H75V40z" fill="currentColor"/>
+    <path d="M30 30h40v40H30z" stroke="currentColor" strokeWidth="10" fill="none"/>
+    <path d="M45 10v80M10 45h80M55 10v80M10 55h80" stroke="currentColor" strokeWidth="10"/>
+  </svg>
+);
 
 const MOCK_TEMPLATES = [
   { id: '1', url: 'https://placehold.co/800x600/18181b/22c55e?text=Distracted+Frog', name: 'Distracted Frog' },
@@ -12,11 +22,20 @@ const MOCK_TEMPLATES = [
 ];
 
 export default function MemeEditor() {
-  const [selectedTemplate, setSelectedTemplate] = useState(MOCK_TEMPLATES[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState(MOCK_TEMPLATES[0].id);
   const [texts, setTexts] = useState([
     { id: 1, content: 'TOP TEXT', top: 10, left: 50, size: 48 }
   ]);
   const memeRef = useRef<HTMLDivElement>(null);
+
+  const selectedTemplate = useMemo(() => 
+    MOCK_TEMPLATES.find(t => t.id === selectedTemplateId) || MOCK_TEMPLATES[0]
+  , [selectedTemplateId]);
+
+  const filteredTemplates = useMemo(() => 
+    MOCK_TEMPLATES.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  , [searchQuery]);
 
   const addText = () => {
     setTexts([...texts, { id: Date.now(), content: 'NEW TEXT', top: 50, left: 50, size: 48 }]);
@@ -35,7 +54,7 @@ export default function MemeEditor() {
       try {
         const dataUrl = await toPng(memeRef.current, { cacheBust: true, pixelRatio: 2 });
         const link = document.createElement('a');
-        link.download = `meme-${Date.now()}.png`;
+        link.download = `ritual-meme-${Date.now()}.png`;
         link.href = dataUrl;
         link.click();
       } catch (err) {
@@ -45,173 +64,165 @@ export default function MemeEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-green-500/30">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden font-sans flex flex-col">
       
-      {/* LEFT SIDEBAR: Templates */}
-      <aside className="w-full md:w-80 border-r border-zinc-800 bg-zinc-950 flex flex-col h-screen">
-        <div className="p-6 border-b border-zinc-800">
-          <div className="flex items-center gap-2 mb-1">
-            <ImageIcon className="text-green-500" size={24} />
-            <h1 className="text-xl font-black tracking-tight text-white">MEME<span className="text-green-500">GEN</span></h1>
-          </div>
-          <p className="text-xs text-zinc-500 font-medium">Select a base template</p>
+      {/* --- BACKGROUND PATTERNS --- */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <RitualKnot className="absolute -bottom-32 -left-32 w-[600px] h-[600px] text-[#10b981] opacity-90 transform rotate-45" />
+        <RitualKnot className="absolute -top-32 -right-32 w-[500px] h-[500px] text-white opacity-90 transform rotate-45" />
+        <RitualKnot className="absolute bottom-10 right-20 w-[300px] h-[300px] text-white opacity-90 transform rotate-45" />
+      </div>
+
+      {/* --- TOP NAVIGATION BAR --- */}
+      <header className="w-full bg-[#10b981] text-black px-6 py-3 flex items-center z-20 relative">
+        <div className="flex items-center gap-3 font-bold text-xl tracking-wide">
+          <RitualKnot className="w-6 h-6 text-black" />
+          <span>Ritual <span className="font-normal opacity-80 mx-2">|</span> Meme Generator</span>
         </div>
+      </header>
+
+      {/* --- MAIN WORKSPACE --- */}
+      <main className="flex-1 relative z-10 flex flex-col p-8 md:p-12">
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-          {MOCK_TEMPLATES.map((tpl) => (
-            <div 
-              key={tpl.id} 
-              onClick={() => setSelectedTemplate(tpl)}
-              className={`group cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 relative ${selectedTemplate.id === tpl.id ? 'border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'border-zinc-800 hover:border-zinc-600'}`}
-            >
-              <img src={tpl.url} alt={tpl.name} className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-8">
-                <p className="text-sm font-semibold text-white truncate">{tpl.name}</p>
-              </div>
-            </div>
-          ))}
+        {/* Search & Select Controls */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-4xl">
+          <select 
+            value={selectedTemplateId}
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            className="bg-white text-black px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[#10b981] cursor-pointer min-w-[200px]"
+          >
+            {MOCK_TEMPLATES.map(tpl => (
+              <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+            ))}
+          </select>
+
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={20} />
+            <input 
+              type="text" 
+              placeholder="Search Template..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent border border-white/30 text-white placeholder:text-white/50 px-10 py-2 text-lg focus:outline-none focus:border-[#10b981] transition-colors"
+            />
+          </div>
         </div>
-      </aside>
 
-      {/* CENTER: Canvas Editor */}
-      <main className="flex-1 p-4 md:p-8 flex items-center justify-center bg-zinc-900 relative overflow-hidden">
-        {/* Subtle grid background for the canvas area */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-
-        <div 
-          ref={memeRef} 
-          className="relative rounded-lg overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-black/50 z-10 bg-black"
-          style={{ width: '100%', maxWidth: '800px' }}
-        >
-          <img 
-            src={selectedTemplate.url} 
-            alt="Meme base" 
-            className="w-full h-auto block pointer-events-none"
-          />
+        {/* Editor Area */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-12 items-start">
           
-          {/* Overlay Texts */}
-          {texts.map((text) => (
-            <div
-              key={text.id}
-              className="absolute text-center w-full select-none"
-              style={{ 
-                top: `${text.top}%`, 
-                left: `${text.left}%`, 
-                transform: 'translate(-50%, -50%)',
-              }}
+          {/* Left: Canvas */}
+          <div className="flex-1 flex justify-center w-full">
+            <div 
+              ref={memeRef} 
+              className="relative w-full max-w-2xl bg-black border border-white/10 shadow-2xl overflow-hidden"
             >
-              <h1 
-                className="uppercase font-black text-white tracking-wide leading-tight"
-                style={{ 
-                  fontSize: `${text.size}px`,
-                  WebkitTextStroke: `${Math.max(2, text.size / 16)}px black`, 
-                  textShadow: '3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
-                  paintOrder: 'stroke fill'
-                }}
-              >
-                {text.content}
-              </h1>
+              <img 
+                src={selectedTemplate.url} 
+                alt="Meme base" 
+                className="w-full h-auto block pointer-events-none"
+              />
+              
+              {/* Overlay Texts */}
+              {texts.map((text) => (
+                <div
+                  key={text.id}
+                  className="absolute text-center w-full select-none"
+                  style={{ 
+                    top: `${text.top}%`, 
+                    left: `${text.left}%`, 
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <h1 
+                    className="uppercase font-black text-white tracking-wide leading-tight"
+                    style={{ 
+                      fontSize: `${text.size}px`,
+                      WebkitTextStroke: `${Math.max(2, text.size / 16)}px black`, 
+                      textShadow: '3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000',
+                      paintOrder: 'stroke fill'
+                    }}
+                  >
+                    {text.content}
+                  </h1>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Right: Floating Control Panel */}
+          <div className="w-full lg:w-96 bg-black/60 backdrop-blur-xl border border-white/10 p-6 shadow-2xl flex flex-col max-h-[70vh]">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-[#10b981]">Layers</h2>
+              <button 
+                onClick={addText}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors border border-white/10"
+              >
+                <Plus size={16} /> Add Text
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar mb-6">
+              {texts.map((text, index) => (
+                <div key={text.id} className="p-4 bg-white/5 border border-white/10 space-y-4 relative group">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-2">
+                      <Type size={14} /> Layer {index + 1}
+                    </label>
+                    <button 
+                      onClick={() => removeText(text.id)}
+                      className="text-white/30 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={text.content}
+                    onChange={(e) => updateText(text.id, 'content', e.target.value)}
+                    className="w-full bg-black/50 border border-white/20 p-2 text-white focus:outline-none focus:border-[#10b981] transition-all font-medium"
+                    placeholder="Enter meme text..."
+                  />
+
+                  {/* Sliders */}
+                  <div className="space-y-2 pt-2">
+                    {[
+                      { label: 'Size', field: 'size', min: 16, max: 120 },
+                      { label: 'Pos Y', field: 'top', min: 0, max: 100 },
+                      { label: 'Pos X', field: 'left', min: 0, max: 100 }
+                    ].map(({ label, field, min, max }) => (
+                      <div key={field} className="flex items-center gap-3">
+                        <span className="text-xs text-white/50 w-8">{label}</span>
+                        <input 
+                          type="range" min={min} max={max} 
+                          value={text[field as keyof typeof text]} 
+                          onChange={(e) => updateText(text.id, field, Number(e.target.value))}
+                          className="flex-1 accent-[#10b981] h-1 bg-white/20 appearance-none cursor-pointer" 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={exportMeme}
+              disabled={texts.length === 0}
+              className="w-full py-4 bg-[#10b981] hover:bg-[#0ea5e9] text-black font-black flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download size={20} />
+              GENERATE
+            </button>
+          </div>
         </div>
       </main>
 
-      {/* RIGHT SIDEBAR: Controls */}
-      <aside className="w-full md:w-96 border-l border-zinc-800 bg-zinc-950 flex flex-col h-screen shadow-[-10px_0_30px_rgba(0,0,0,0.5)] z-20">
-        <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/80 backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <Settings2 className="text-zinc-400" size={20} />
-            <h2 className="text-lg font-bold text-white">Editor</h2>
-          </div>
-          <button 
-            onClick={addText}
-            className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-sm font-medium rounded-lg transition-colors border border-zinc-700"
-          >
-            <Plus size={16} /> Add Text
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {texts.map((text, index) => (
-            <div key={text.id} className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4 relative group">
-              
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-xs text-green-400 font-bold tracking-wider uppercase flex items-center gap-2">
-                  <Type size={14} /> Layer {index + 1}
-                </label>
-                <button 
-                  onClick={() => removeText(text.id)}
-                  className="text-zinc-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-
-              {/* Text Input */}
-              <input
-                type="text"
-                value={text.content}
-                onChange={(e) => updateText(text.id, 'content', e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
-                placeholder="Enter meme text..."
-              />
-
-              {/* Sliders */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-500 w-8 font-medium">Size</span>
-                  <input 
-                    type="range" min="16" max="120" value={text.size} 
-                    onChange={(e) => updateText(text.id, 'size', Number(e.target.value))}
-                    className="flex-1 accent-green-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer" 
-                  />
-                  <span className="text-xs text-zinc-400 w-6 text-right">{text.size}</span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-500 w-8 font-medium">Pos Y</span>
-                  <input 
-                    type="range" min="0" max="100" value={text.top} 
-                    onChange={(e) => updateText(text.id, 'top', Number(e.target.value))}
-                    className="flex-1 accent-green-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer" 
-                  />
-                  <span className="text-xs text-zinc-400 w-6 text-right">{text.top}%</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-500 w-8 font-medium">Pos X</span>
-                  <input 
-                    type="range" min="0" max="100" value={text.left} 
-                    onChange={(e) => updateText(text.id, 'left', Number(e.target.value))}
-                    className="flex-1 accent-green-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer" 
-                  />
-                  <span className="text-xs text-zinc-400 w-6 text-right">{text.left}%</span>
-                </div>
-              </div>
-
-            </div>
-          ))}
-
-          {texts.length === 0 && (
-            <div className="text-center p-8 text-zinc-500 text-sm border-2 border-dashed border-zinc-800 rounded-xl">
-              No text layers. Click "Add Text" to start.
-            </div>
-          )}
-        </div>
-
-        {/* Export Button Pinned to Bottom */}
-        <div className="p-6 border-t border-zinc-800 bg-zinc-950">
-          <button 
-            onClick={exportMeme}
-            disabled={texts.length === 0}
-            className="w-full py-4 bg-green-500 hover:bg-green-400 text-black font-black rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            <Download size={20} />
-            GENERATE MEME
-          </button>
-        </div>
-      </aside>
-
+      {/* --- FOOTER --- */}
+      <footer className="absolute bottom-6 right-8 text-white/70 text-sm font-medium z-20">
+        Built by: Mantissa | X, Discord: @dotmantissa
+      </footer>
     </div>
   );
 }
