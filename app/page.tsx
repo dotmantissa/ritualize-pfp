@@ -84,18 +84,18 @@ export default function App() {
             className="absolute -top-[150px] -right-[150px] w-[600px] h-[600px] object-contain opacity-90" 
           />
 
-          {/* Bottom Left Green Logo */}
+          {/* Bottom Left Green Logo (Moved Up) */}
           <img 
             src="/logo-green.png" 
             alt="" 
-            className="absolute -bottom-[200px] -left-[150px] w-[700px] h-[700px] object-contain opacity-90" 
+            className="absolute -bottom-[120px] -left-[150px] w-[700px] h-[700px] object-contain opacity-90" 
           />
 
-          {/* Bottom Adjacent White Logo (Tucked closely to the Green one) */}
+          {/* Bottom Adjacent White Logo (Moved Up & Pushed Right) */}
           <img 
             src="/logo-white.png" 
             alt="" 
-            className="absolute -bottom-[250px] left-[320px] w-[500px] h-[500px] object-contain opacity-90" 
+            className="absolute -bottom-[170px] left-[420px] w-[500px] h-[500px] object-contain opacity-90" 
           />
 
         </div>
