@@ -170,7 +170,7 @@ export default function App() {
               <img src="/logo-black.png" alt="Ritual" className="w-6 h-6 object-contain" />
               <span className="font-bold text-black">Ritual</span>
               <span className="text-white mx-1">|</span>
-              <span className="text-white">PFP Generator</span>
+              <span className="text-white">Card Generator</span>
             </div>
           </header>
 
@@ -302,9 +302,6 @@ export default function App() {
                   <Dices size={20} />
                   REROLL IDENTITY
                 </button>
-                <p className="text-xs text-center text-zinc-500">
-                  Templates dynamically built from CSS Engine.
-                </p>
               </div>
 
               <div className="p-6 border-t border-zinc-800 bg-zinc-950">
@@ -313,7 +310,7 @@ export default function App() {
                   className="w-full py-4 bg-[#22c55e] hover:bg-[#1ea550] text-black font-black rounded-xl flex items-center justify-center gap-2 transition-all"
                 >
                   <Download size={20} />
-                  DOWNLOAD HIGH-RES PFP
+                  DOWNLOAD CARD
                 </button>
               </div>
             </aside>
