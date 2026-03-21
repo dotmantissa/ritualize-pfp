@@ -210,10 +210,6 @@ export default function App() {
               <ArrowLeft size={20} />
               <span className="font-medium">Back to Upload</span>
             </button>
-            <div className="flex items-center gap-2 text-[#22c55e] font-bold">
-              <ImageIcon size={20} />
-              <span>Identity Forged</span>
-            </div>
           </header>
 
           <main className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-65px)] overflow-hidden">
