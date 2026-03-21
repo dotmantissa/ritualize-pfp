@@ -4,16 +4,6 @@ import { useState, useRef, useMemo } from 'react';
 import { toPng } from 'html-to-image';
 import { Download, Plus, Type, Trash2, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 
-// --- ICONS & SVGS ---
-const RitualKnot = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <path d="M25 25h15v15H25zM60 25h15v15H60zM25 60h15v15H25zM60 60h15v15H60z" fill="currentColor"/>
-    <path fillRule="evenodd" clipRule="evenodd" d="M40 10h20v15H40V10zm0 65h20v15H40V75zM10 40h15v20H10V40zm65 0h15v20H75V40z" fill="currentColor"/>
-    <path d="M30 30h40v40H30z" stroke="currentColor" strokeWidth="10" fill="none"/>
-    <path d="M45 10v80M10 45h80M55 10v80M10 55h80" stroke="currentColor" strokeWidth="10"/>
-  </svg>
-);
-
 const MOCK_TEMPLATES = [
   { id: '1', url: 'https://placehold.co/800x600/18181b/22c55e?text=Distracted+Frog', name: 'Distracted Frog' },
   { id: '2', url: 'https://placehold.co/800x600/18181b/22c55e?text=Frog+Mind+Change', name: 'Frog Changing Mind' },
@@ -31,7 +21,6 @@ export default function App() {
   ]);
   const memeRef = useRef<HTMLDivElement>(null);
 
-  // --- LOGIC ---
   const selectedTemplate = useMemo(() => 
     MOCK_TEMPLATES.find(t => t.id === selectedTemplateId) || MOCK_TEMPLATES[0]
   , [selectedTemplateId]);
@@ -39,7 +28,7 @@ export default function App() {
   const handleSelectTemplate = (id: string) => {
     if (!id) return;
     setSelectedTemplateId(id);
-    setView('editor'); // Instantly jump to editor when a template is picked
+    setView('editor');
   };
 
   const addText = () => {
@@ -69,23 +58,23 @@ export default function App() {
   };
 
   // ==========================================
-  // VIEW 1: THE LANDING PAGE (Exact Mockup Match)
+  // VIEW 1: THE LANDING PAGE
   // ==========================================
   if (view === 'landing') {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden font-sans">
         
-        {/* Background Patterns */}
+        {/* Background Patterns using Static Images */}
         <div className="absolute inset-0 pointer-events-none z-0">
-          <RitualKnot className="absolute -bottom-32 -left-32 w-[600px] h-[600px] text-[#22c55e] transform rotate-45" />
-          <RitualKnot className="absolute -top-32 -right-32 w-[500px] h-[500px] text-white transform rotate-45" />
-          <RitualKnot className="absolute -bottom-10 right-20 w-[300px] h-[300px] text-white transform rotate-45" />
+          <img src="/logo-green.png" alt="" className="absolute -bottom-32 -left-32 w-[600px] h-[600px] object-contain opacity-90 transform rotate-45" />
+          <img src="/logo-white.png" alt="" className="absolute -top-32 -right-32 w-[500px] h-[500px] object-contain opacity-90 transform rotate-45" />
+          <img src="/logo-white.png" alt="" className="absolute -bottom-10 right-20 w-[300px] h-[300px] object-contain opacity-90 transform rotate-45" />
         </div>
 
         {/* Top Green Bar */}
         <header className="w-full bg-[#22c55e] px-6 py-3 flex items-center z-20 relative">
           <div className="flex items-center gap-2 text-xl tracking-tight">
-            <RitualKnot className="w-6 h-6 text-black" />
+            <img src="/logo-black.png" alt="Ritual" className="w-6 h-6 object-contain" />
             <span className="font-bold text-black">Ritual</span>
             <span className="text-white mx-1">|</span>
             <span className="text-white">Meme Generator</span>
@@ -154,7 +143,6 @@ export default function App() {
         
         {/* Canvas Area */}
         <div className="flex-1 bg-zinc-950 flex items-center justify-center p-8 relative overflow-y-auto">
-          {/* Subtle Grid */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           
           <div 
@@ -165,12 +153,13 @@ export default function App() {
               src={selectedTemplate.url} 
               alt="Meme base" 
               className="w-full h-auto block pointer-events-none"
+              crossOrigin="anonymous"
             />
             
             {texts.map((text) => (
               <div
                 key={text.id}
-                className="absolute text-center w-full select-none"
+                className="absolute text-center w-full select-none cursor-move"
                 style={{ 
                   top: `${text.top}%`, 
                   left: `${text.left}%`, 
