@@ -26,7 +26,6 @@ export default function App() {
     MOCK_TEMPLATES.find(t => t.id === selectedTemplateId) || MOCK_TEMPLATES[0]
   , [selectedTemplateId]);
 
-  // Dynamically filter templates based on search input
   const filteredTemplates = useMemo(() => {
     if (!searchQuery.trim()) return [];
     return MOCK_TEMPLATES.filter(t => 
@@ -37,7 +36,7 @@ export default function App() {
   const handleSelectTemplate = (id: string) => {
     if (!id) return;
     setSelectedTemplateId(id);
-    setSearchQuery(''); // Reset search when entering editor
+    setSearchQuery(''); 
     setShowSearchResults(false);
     setView('editor');
   };
@@ -75,26 +74,33 @@ export default function App() {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden font-sans">
         
-        {/* Background Patterns - Forced Rotation via Inline CSS */}
+        {/* Background Patterns - Wrapped in rotated divs for guaranteed positioning */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <img 
-            src="/logo-green.png" 
-            alt="" 
-            className="absolute -bottom-48 -left-48 w-[800px] h-[800px] object-contain opacity-90" 
-            style={{ transform: 'rotate(45deg)' }} 
-          />
-          <img 
-            src="/logo-white.png" 
-            alt="" 
-            className="absolute -top-48 -right-48 w-[700px] h-[700px] object-contain opacity-90" 
-            style={{ transform: 'rotate(45deg)' }} 
-          />
-          <img 
-            src="/logo-white.png" 
-            alt="" 
-            className="absolute -bottom-16 right-16 w-[350px] h-[350px] object-contain opacity-90" 
-            style={{ transform: 'rotate(45deg)' }} 
-          />
+          
+          {/* Top Right White Logo */}
+          <div 
+            className="absolute w-[800px] h-[800px] opacity-90" 
+            style={{ top: '-350px', right: '-250px', transform: 'rotate(45deg)' }}
+          >
+            <img src="/logo-white.png" alt="" className="w-full h-full object-contain" />
+          </div>
+
+          {/* Bottom Left Green Logo */}
+          <div 
+            className="absolute w-[800px] h-[800px] opacity-90" 
+            style={{ bottom: '-300px', left: '-300px', transform: 'rotate(45deg)' }}
+          >
+            <img src="/logo-green.png" alt="" className="w-full h-full object-contain" />
+          </div>
+
+          {/* Bottom Center White Logo (Tucked next to the Green one) */}
+          <div 
+            className="absolute w-[800px] h-[800px] opacity-90" 
+            style={{ bottom: '-450px', left: '150px', transform: 'rotate(45deg)' }}
+          >
+            <img src="/logo-white.png" alt="" className="w-full h-full object-contain" />
+          </div>
+
         </div>
 
         {/* Top Green Bar */}
