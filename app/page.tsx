@@ -106,7 +106,7 @@ export default function App() {
             <img src="/logo-black.png" alt="Ritual" className="w-6 h-6 object-contain" />
             <span className="font-bold text-black">Ritual</span>
             <span className="text-white mx-1">|</span>
-            <span className="text-white">Meme Generator</span>
+            <span className="text-white">PFP Generator</span>
           </div>
         </header>
 
