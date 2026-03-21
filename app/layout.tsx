@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "Ritual | Card Generator",
-  description: "Custom Web3 Character Meme Generator",
+  description: "Card generator for the Ritual Community",
 };
 
 export default function RootLayout({
