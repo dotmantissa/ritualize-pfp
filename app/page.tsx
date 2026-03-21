@@ -14,6 +14,7 @@ const MOCK_TEMPLATES = [
 export default function App() {
   const [view, setView] = useState<'landing' | 'editor'>('landing');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   
   const [texts, setTexts] = useState([
@@ -25,9 +26,19 @@ export default function App() {
     MOCK_TEMPLATES.find(t => t.id === selectedTemplateId) || MOCK_TEMPLATES[0]
   , [selectedTemplateId]);
 
+  // Dynamically filter templates based on search input
+  const filteredTemplates = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return MOCK_TEMPLATES.filter(t => 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   const handleSelectTemplate = (id: string) => {
     if (!id) return;
     setSelectedTemplateId(id);
+    setSearchQuery(''); // Reset search when entering editor
+    setShowSearchResults(false);
     setView('editor');
   };
 
@@ -64,11 +75,26 @@ export default function App() {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden font-sans">
         
-        {/* Background Patterns using Static Images */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <img src="/logo-green.png" alt="" className="absolute -bottom-32 -left-32 w-[600px] h-[600px] object-contain opacity-90 transform rotate-45" />
-          <img src="/logo-white.png" alt="" className="absolute -top-32 -right-32 w-[500px] h-[500px] object-contain opacity-90 transform rotate-45" />
-          <img src="/logo-white.png" alt="" className="absolute -bottom-10 right-20 w-[300px] h-[300px] object-contain opacity-90 transform rotate-45" />
+        {/* Background Patterns - Forced Rotation via Inline CSS */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <img 
+            src="/logo-green.png" 
+            alt="" 
+            className="absolute -bottom-48 -left-48 w-[800px] h-[800px] object-contain opacity-90" 
+            style={{ transform: 'rotate(45deg)' }} 
+          />
+          <img 
+            src="/logo-white.png" 
+            alt="" 
+            className="absolute -top-48 -right-48 w-[700px] h-[700px] object-contain opacity-90" 
+            style={{ transform: 'rotate(45deg)' }} 
+          />
+          <img 
+            src="/logo-white.png" 
+            alt="" 
+            className="absolute -bottom-16 right-16 w-[350px] h-[350px] object-contain opacity-90" 
+            style={{ transform: 'rotate(45deg)' }} 
+          />
         </div>
 
         {/* Top Green Bar */}
@@ -83,13 +109,13 @@ export default function App() {
 
         {/* Center Controls */}
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[70vh] px-4">
-          <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-2xl">
+          <div className="flex flex-col md:flex-row items-start gap-4 w-full max-w-2xl">
             
             {/* White Dropdown */}
             <select 
               value={selectedTemplateId}
               onChange={(e) => handleSelectTemplate(e.target.value)}
-              className="bg-white text-black px-4 py-3 min-w-[200px] focus:outline-none appearance-none cursor-pointer font-medium"
+              className="bg-white text-black px-4 py-3 min-w-[200px] focus:outline-none appearance-none cursor-pointer font-medium border border-white"
               style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .7rem top 50%', backgroundSize: '.65rem auto' }}
             >
               <option value="" disabled>Choose Template</option>
@@ -98,14 +124,43 @@ export default function App() {
               ))}
             </select>
 
-            {/* Dark Search Bar */}
-            <input 
-              type="text" 
-              placeholder="Search Template..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-black/50 border border-[#22c55e] text-white placeholder:text-gray-400 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-[#22c55e] w-full md:w-auto"
-            />
+            {/* Dark Search Bar & Autocomplete Dropdown */}
+            <div className="relative flex-1 w-full md:w-auto">
+              <input 
+                type="text" 
+                placeholder="Search Template..." 
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSearchResults(true);
+                }}
+                onFocus={() => setShowSearchResults(true)}
+                onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+                className="w-full bg-black/50 border border-[#22c55e] text-white placeholder:text-gray-400 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-[#22c55e]"
+              />
+
+              {/* Live Search Results */}
+              {showSearchResults && searchQuery.trim() !== '' && (
+                <ul className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 shadow-xl max-h-64 overflow-y-auto z-50 rounded-md">
+                  {filteredTemplates.length > 0 ? (
+                    filteredTemplates.map(tpl => (
+                      <li 
+                        key={tpl.id}
+                        onClick={() => handleSelectTemplate(tpl.id)}
+                        className="px-4 py-3 hover:bg-zinc-800 cursor-pointer flex items-center gap-3 border-b border-zinc-800/50 last:border-0 transition-colors"
+                      >
+                        <img src={tpl.url} alt={tpl.name} className="w-12 h-10 object-cover rounded bg-black" />
+                        <span className="font-medium text-white">{tpl.name}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-4 text-zinc-500 text-center font-medium">
+                      No templates found
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
           </div>
         </main>
 
@@ -126,7 +181,10 @@ export default function App() {
       {/* Editor Header */}
       <header className="w-full bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex justify-between items-center z-20">
         <button 
-          onClick={() => setView('landing')}
+          onClick={() => {
+            setView('landing');
+            setSelectedTemplateId('');
+          }}
           className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
         >
           <ArrowLeft size={20} />
