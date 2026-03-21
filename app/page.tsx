@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud } from 'lucide-react';
 
@@ -27,26 +27,36 @@ export default function App() {
     setTemplateNum(randomTemplateNumber);
   };
 
+  // Convert uploaded file to safe Base64 String to fix html-to-image download blocks
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUserImage(imageUrl);
-      randomizeIdentity(); // Assign initial random squad upon upload
-      setView('editor');
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUserImage(reader.result as string);
+        randomizeIdentity(); 
+        setView('editor');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const exportPFP = async () => {
     if (pfpRef.current) {
       try {
-        const dataUrl = await toPng(pfpRef.current, { cacheBust: true, pixelRatio: 2 });
+        const dataUrl = await toPng(pfpRef.current, { 
+          cacheBust: true, 
+          pixelRatio: 2,
+          // Extra safety options for local cross-origin
+          backgroundColor: '#000000',
+        });
         const link = document.createElement('a');
         link.download = `ritual-pfp-${assignedSquad?.name.replace(' ', '-')}-${Date.now()}.png`;
         link.href = dataUrl;
         link.click();
       } catch (err) {
         console.error('Failed to export PFP', err);
+        alert('Failed to generate image. Ensure templates exist in the public folder.');
       }
     }
   };
@@ -110,7 +120,7 @@ export default function App() {
         </main>
 
         {/* Footer */}
-        <footer className="absolute bottom-6 right-8 text-white text-sm z-20 font-medium">
+        <footer className="absolute bottom-6 right-8 text-white text-sm z-20 font-medium tracking-wide">
           Built by: Mantissa &nbsp;|&nbsp; X, Discord: @dotmantissa
         </footer>
       </div>
@@ -149,18 +159,17 @@ export default function App() {
         <div className="flex-1 bg-zinc-950 flex items-center justify-center p-8 relative overflow-y-auto">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           
-          {/* PFP Stacking Container */}
+          {/* PFP Stacking Container for Export */}
           <div 
             ref={pfpRef} 
             className="relative bg-black ring-1 ring-white/10 shadow-2xl z-10 w-full max-w-xl aspect-square overflow-hidden rounded-md"
           >
-            {/* Layer 1: User Image (Center Cropped via object-cover) */}
+            {/* Layer 1: User Base64 Image */}
             {userImage && (
               <img 
                 src={userImage} 
                 alt="Base Photo" 
                 className="absolute inset-0 w-full h-full object-cover"
-                crossOrigin="anonymous"
               />
             )}
             
@@ -170,9 +179,7 @@ export default function App() {
                 src={`/templates/${assignedSquad.name}/template_${templateNum}.png`} 
                 alt="PFP Template" 
                 className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
-                crossOrigin="anonymous"
                 onError={(e) => {
-                  // Fallback visual if image isn't in public folder yet
                   e.currentTarget.style.display = 'none';
                 }}
               />
