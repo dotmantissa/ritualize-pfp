@@ -22,7 +22,6 @@ export default function RitualPFPGenerator() {
       setUserImage(imageUrl);
       setAssignedSquad(null);
       
-      // Draw the initial uploaded image to the canvas
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
       if (canvas && ctx) {
@@ -43,7 +42,6 @@ export default function RitualPFPGenerator() {
   const generatePFP = async () => {
     if (!userImage || !canvasRef.current) return;
 
-    // Randomize
     const randomSquad = SQUADS[Math.floor(Math.random() * SQUADS.length)];
     const randomTemplateNum = Math.floor(Math.random() * 5) + 1;
     setAssignedSquad(randomSquad);
@@ -55,14 +53,12 @@ export default function RitualPFPGenerator() {
     if (!ctx) return;
 
     try {
-      // 1. Redraw base image (to clear previous templates if user clicks generate multiple times)
       const baseImg = await loadImage(userImage);
       const size = Math.min(baseImg.width, baseImg.height);
       const xOffset = (baseImg.width - size) / 2;
       const yOffset = (baseImg.height - size) / 2;
       ctx.drawImage(baseImg, xOffset, yOffset, size, size, 0, 0, 1000, 1000);
 
-      // 2. Overlay the template
       const overlayImg = await loadImage(templatePath);
       ctx.drawImage(overlayImg, 0, 0, 1000, 1000);
     } catch (error) {
@@ -90,74 +86,95 @@ export default function RitualPFPGenerator() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex flex-col items-center py-10 px-4">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden font-sans">
       
-      {/* Title Area */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-2">Ritual PFP Generator</h1>
-        <p className="text-gray-400">Upload, randomize, and claim your squad.</p>
+      {/* HEADER MATCHING THE IMAGE EXACTLY */}
+      <header className="w-full bg-[#24C958] px-6 py-3 flex items-center shadow-md relative z-20">
+        <div className="flex items-center gap-2 text-black font-bold text-xl tracking-wide">
+          {/* Replace with your exact SVG Ritual knot logo for the header if needed */}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+             <path d="M12 2L2 12l10 10 10-10L12 2zm0 14.5L7.5 12 12 7.5 16.5 12 12 16.5z"/>
+          </svg>
+          <span>Ritual | PFP Generator</span>
+        </div>
+      </header>
+
+      {/* BACKGROUND KNOT GRAPHICS (Placeholders for your existing SVGs/Images) */}
+      <div className="absolute top-12 right-0 opacity-90 pointer-events-none z-0">
+         {/* Drop your white corner graphic here */}
+      </div>
+      <div className="absolute bottom-0 left-0 opacity-90 pointer-events-none z-0">
+         {/* Drop your green corner graphic here */}
       </div>
 
-      {/* Editor Container (Matches the old meme layout) */}
-      <div className="w-full max-w-2xl bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
+      {/* MAIN CONTENT AREA */}
+      <main className="relative z-10 flex flex-col items-center pt-20 px-4 w-full max-w-3xl mx-auto">
         
-        {/* The Image Preview Area */}
-        <div className="w-full aspect-square bg-gray-950 border border-gray-700 rounded-lg flex items-center justify-center mb-6 overflow-hidden relative">
-          {!userImage && (
-            <span className="text-gray-500 absolute pointer-events-none">Preview Area</span>
-          )}
-          <canvas 
-            ref={canvasRef} 
-            className={`w-full h-full object-contain ${!userImage ? 'opacity-0' : 'opacity-100'}`}
-          />
-        </div>
-
-        {/* The Controls Area (Replaced search/dropdown with Upload/Generate) */}
-        <div className="space-y-4">
+        {/* Controls Row (Matching the layout of the dropdown/search bar) */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full mb-8">
           
-          {/* Upload Button */}
-          <div className="relative w-full">
+          {/* Upload Button (Styled like the white dropdown) */}
+          <div className="relative flex-1">
             <input 
               type="file" 
               accept="image/*" 
               onChange={handleImageUpload} 
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
-            <div className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-center rounded-lg font-medium transition-colors border border-gray-700">
-              {userImage ? 'Upload New Photo' : '1. Upload Base Photo'}
+            <div className="w-full bg-white text-black py-2 px-4 flex justify-between items-center cursor-pointer h-[42px]">
+              <span className="text-sm">{userImage ? 'Change Image' : 'Upload Image'}</span>
+              <span className="text-xs">▼</span>
             </div>
           </div>
 
-          {/* Generate Button */}
-          <button 
-            onClick={generatePFP}
-            disabled={!userImage}
-            className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            2. Randomize Squad & Apply Template
-          </button>
+          {/* Action Buttons Container (Styled like the black search bar with green border) */}
+          <div className="flex-[2] flex gap-2">
+            <button 
+              onClick={generatePFP}
+              disabled={!userImage}
+              className="flex-1 bg-black border border-[#24C958] text-gray-300 py-2 px-4 text-left text-sm h-[42px] hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Generate PFP...
+            </button>
+            <button 
+              onClick={downloadPFP}
+              disabled={!userImage}
+              className="bg-[#24C958] text-black font-bold px-6 h-[42px] hover:bg-[#1eb54f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Download
+            </button>
+          </div>
+        </div>
 
-          {/* Squad Indicator (Only shows after generation) */}
+        {/* Level/Squad Display (Matching your uploaded level.png reference) */}
+        <div className="w-full flex items-center gap-4 mb-4 min-h-[40px]">
           {assignedSquad && (
-            <div className="text-center py-2">
-              <span className="text-gray-400 text-sm">Squad: </span>
-              <span className="font-bold tracking-wide uppercase" style={{ color: assignedSquad.color }}>
+            <>
+              <div className="flex-grow h-px bg-gray-600"></div>
+              <span className="text-5xl font-light text-gray-300 tracking-wide" style={{ color: assignedSquad.color }}>
                 {assignedSquad.name}
               </span>
-            </div>
+            </>
           )}
-
-          {/* Download Button */}
-          <button 
-            onClick={downloadPFP}
-            disabled={!userImage}
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            3. Download PFP
-          </button>
-
         </div>
-      </div>
-    </main>
+
+        {/* Canvas / Preview Area */}
+        <div className="w-full aspect-square bg-black border border-gray-800 flex items-center justify-center relative shadow-2xl overflow-hidden">
+           {!userImage && (
+             <div className="text-gray-600 text-sm tracking-widest uppercase">Awaiting Base Protocol</div>
+           )}
+           <canvas 
+            ref={canvasRef} 
+            className={`w-full h-full object-contain ${!userImage ? 'opacity-0' : 'opacity-100'}`}
+          />
+        </div>
+      </main>
+
+      {/* FOOTER EXACTLY AS REQUESTED */}
+      <footer className="absolute bottom-6 right-8 z-20 text-gray-200 text-sm tracking-wide">
+        Built by: Mantissa | X, Discord: @dotmantissa
+      </footer>
+
+    </div>
   );
 }
