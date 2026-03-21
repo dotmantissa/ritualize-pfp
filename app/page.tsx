@@ -74,32 +74,29 @@ export default function App() {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden font-sans">
         
-        {/* Background Patterns - Wrapped in rotated divs for guaranteed positioning */}
+        {/* Background Patterns - Using Pre-Rotated Images */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           
           {/* Top Right White Logo */}
-          <div 
-            className="absolute w-[800px] h-[800px] opacity-90" 
-            style={{ top: '-350px', right: '-250px', transform: 'rotate(45deg)' }}
-          >
-            <img src="/logo-white.png" alt="" className="w-full h-full object-contain" />
-          </div>
+          <img 
+            src="/logo-white.png" 
+            alt="" 
+            className="absolute -top-[150px] -right-[150px] w-[600px] h-[600px] object-contain opacity-90" 
+          />
 
           {/* Bottom Left Green Logo */}
-          <div 
-            className="absolute w-[800px] h-[800px] opacity-90" 
-            style={{ bottom: '-300px', left: '-300px', transform: 'rotate(45deg)' }}
-          >
-            <img src="/logo-green.png" alt="" className="w-full h-full object-contain" />
-          </div>
+          <img 
+            src="/logo-green.png" 
+            alt="" 
+            className="absolute -bottom-[200px] -left-[150px] w-[700px] h-[700px] object-contain opacity-90" 
+          />
 
-          {/* Bottom Center White Logo (Tucked next to the Green one) */}
-          <div 
-            className="absolute w-[800px] h-[800px] opacity-90" 
-            style={{ bottom: '-450px', left: '150px', transform: 'rotate(45deg)' }}
-          >
-            <img src="/logo-white.png" alt="" className="w-full h-full object-contain" />
-          </div>
+          {/* Bottom Adjacent White Logo (Tucked closely to the Green one) */}
+          <img 
+            src="/logo-white.png" 
+            alt="" 
+            className="absolute -bottom-[250px] left-[320px] w-[500px] h-[500px] object-contain opacity-90" 
+          />
 
         </div>
 
@@ -147,7 +144,7 @@ export default function App() {
 
               {/* Live Search Results */}
               {showSearchResults && searchQuery.trim() !== '' && (
-                <ul className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 shadow-xl max-h-64 overflow-y-auto z-50 rounded-md">
+                <ul className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 shadow-xl max-h-64 overflow-y-auto z-50 rounded-md custom-scrollbar">
                   {filteredTemplates.length > 0 ? (
                     filteredTemplates.map(tpl => (
                       <li 
