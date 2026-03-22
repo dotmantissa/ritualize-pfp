@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud, User } from 'lucide-react';
+import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud, User, Share2 } from 'lucide-react';
 
 // --- DATA DICTIONARY FOR THE 25 TEMPLATES ---
 const TEMPLATES_DB = {
@@ -236,6 +236,16 @@ export default function App() {
     }
   };
 
+  const shareToX = () => {
+    if (!assignedSquad || !nickname.trim()) return;
+    
+    const text = `I just initialized my identity on the Ritual Protocol as ${nickname.trim()}.\n\nTier: ${assignedSquad.name} (${assignedSquad.level})\n"${fortune}"\n\nForge yours here: `;
+    const url = "https://ritualize-pfp.vercel.app/";
+    
+    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(xUrl, '_blank');
+  };
+
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
@@ -273,7 +283,6 @@ export default function App() {
         .divider::before { left: 0; }
         .divider::after { right: 0; }
         
-        /* NEW: Fortune Cookie Text Area */
         .card-fortune { position: absolute; top: 265px; left: 24px; right: 24px; height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 10.5px; font-weight: 500; line-height: 1.3; color: var(--c); opacity: 0.75; font-style: italic; z-index: 6; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
 
         .badge { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 6; width: 240px; }
@@ -419,7 +428,6 @@ export default function App() {
 
                       <div className="divider"></div>
                       
-                      {/* NEW: Fortune Cookie Text */}
                       <div className="card-fortune">
                         "{fortune}"
                       </div>
@@ -492,7 +500,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-zinc-800 bg-zinc-950">
+              <div className="p-6 border-t border-zinc-800 bg-zinc-950 flex flex-col gap-3">
                 <button 
                   onClick={exportPFP}
                   disabled={isAliasMissing}
@@ -504,6 +512,19 @@ export default function App() {
                 >
                   <Download size={20} />
                   DOWNLOAD CARD
+                </button>
+
+                <button 
+                  onClick={shareToX}
+                  disabled={isAliasMissing}
+                  className={`w-full py-4 font-black rounded-xl flex items-center justify-center gap-2 transition-all border ${
+                    isAliasMissing 
+                      ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed' 
+                      : 'bg-black hover:bg-zinc-900 text-white border-zinc-700 hover:border-zinc-500'
+                  }`}
+                >
+                  <Share2 size={20} />
+                  BROADCAST TO X
                 </button>
               </div>
             </aside>
