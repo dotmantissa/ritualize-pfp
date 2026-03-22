@@ -237,16 +237,21 @@ export default function App() {
     }
   };
 
-  const shareToX = () => {
-    if (!assignedSquad || !nickname.trim()) return;
+const shareToX = async () => {
+    if (!assignedSquad || !nickname.trim() || !pfpRef.current) return;
     
-    const text = `I just initialized my identity on the Ritual Protocol as ${nickname.trim()}.\n\nTier: ${assignedSquad.name} (${assignedSquad.level})\n"${fortune}"\n\nForge yours here: `;
+    // 1. Automatically download the card to their device first
+    await exportPFP();
+    
+    // 2. Draft the tweet with a call-to-action to attach the file
+    const text = `I just initialized my identity on the Ritual Protocol as ${nickname.trim()}.\n\nTier: ${assignedSquad.name} (${assignedSquad.level})\n"${fortune}"\n\n[ 📎 Attach your downloaded card here ]\n\nForge yours: `;
     const url = "https://ritualize-pfp.vercel.app/";
     
+    // 3. Open the X composer
     const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(xUrl, '_blank');
   };
-
+  
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
