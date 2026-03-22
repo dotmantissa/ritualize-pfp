@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud } from 'lucide-react';
+import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud, User } from 'lucide-react';
 
 // --- DATA DICTIONARY FOR THE 25 TEMPLATES ---
 const TEMPLATES_DB = {
@@ -54,14 +54,31 @@ const SQUADS = [
 export default function App() {
   const [view, setView] = useState<'landing' | 'editor'>('landing');
   const [userImage, setUserImage] = useState<string | null>(null);
+  const [nickname, setNickname] = useState<string>(''); // State for the nickname
   const [assignedSquad, setAssignedSquad] = useState<typeof SQUADS[0] | null>(null);
   const [templateNum, setTemplateNum] = useState<number>(0);
+  const [rerollsLeft, setRerollsLeft] = useState<number>(0);
   const pfpRef = useRef<HTMLDivElement>(null);
 
   const randomizeIdentity = () => {
-    const randomSquadIndex = Math.floor(Math.random() * SQUADS.length);
+    const roll = Math.random() * 100;
+    
+    let squadIndex = 0; 
+    
+    if (roll < 45) {
+      squadIndex = 0; // Normie (45%)
+    } else if (roll < 75) {
+      squadIndex = 1; // Bitty (30%)
+    } else if (roll < 90) {
+      squadIndex = 2; // Ritty (15%)
+    } else if (roll < 98) {
+      squadIndex = 3; // Ritualist (8%)
+    } else {
+      squadIndex = 4; // Ascendant Ritualist (2%)
+    }
+
     const randomTemplateNumber = Math.floor(Math.random() * 5); // 0-4 for array index
-    setAssignedSquad(SQUADS[randomSquadIndex]);
+    setAssignedSquad(SQUADS[squadIndex]);
     setTemplateNum(randomTemplateNumber);
   };
 
@@ -71,49 +88,50 @@ export default function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserImage(reader.result as string);
-        randomizeIdentity(); 
+        setRerollsLeft(Math.floor(Math.random() * 3) + 1); // Grants 1, 2, or 3 rerolls randomly
+        randomizeIdentity(); // Initial free roll
         setView('editor');
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const handleRerollClick = () => {
+    if (rerollsLeft > 0) {
+      randomizeIdentity();
+      setRerollsLeft(prev => prev - 1);
+    }
+  };
+
   const exportPFP = async () => {
     if (pfpRef.current) {
       try {
-        // High Pixel Ratio ensures the 280x380 CSS card downloads as a crisp 1120x1520 image
         const dataUrl = await toPng(pfpRef.current, { 
           cacheBust: true, 
           pixelRatio: 4,
           backgroundColor: '#080808'
         });
         const link = document.createElement('a');
-        link.download = `ritual-pfp-${assignedSquad?.name.replace(' ', '-')}-${Date.now()}.png`;
+        link.download = `ritual-card-${assignedSquad?.name.replace(' ', '-')}-${Date.now()}.png`;
         link.href = dataUrl;
         link.click();
       } catch (err) {
-        console.error('Failed to export PFP', err);
+        console.error('Failed to export Card', err);
       }
     }
   };
 
-  // Get current template data safely
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
 
   return (
     <>
-      {/* Injecting your exact styling, isolated specifically for the PFP Export Node.
-        Using global imports for fonts so the downloaded canvas renders them correctly.
-      */}
       <style dangerouslySetInnerHTML={{__html: `
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Rajdhani:wght@400;500;600&display=swap');
         
         .pfp-export-node * { box-sizing: border-box; margin: 0; padding: 0; }
-        .pfp-export-node {
-          font-family: 'Rajdhani', sans-serif;
-        }
+        .pfp-export-node { font-family: 'Rajdhani', sans-serif; }
         .card { width: 280px; height: 380px; position: relative; border-radius: 16px; overflow: hidden; flex-shrink: 0; background: #000; }
         .card-inner { position: absolute; inset: 0; border-radius: 16px; overflow: hidden; }
         .bg { position: absolute; inset: 0; }
@@ -130,6 +148,10 @@ export default function App() {
         .portrait-ring-outer { position: absolute; inset: -7px; border-radius: 50%; border: 1.5px solid var(--c); box-shadow: 0 0 16px var(--glow), inset 0 0 12px var(--glow); }
         .portrait-ring-inner { position: absolute; inset: -2px; border-radius: 50%; border: 1px solid var(--c); opacity: .3; }
         .portrait-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; background: var(--pbg); position: relative; display: flex; align-items: center; justify-content: center; }
+        
+        /* NEW: The Nickname Class perfectly nestled under the image */
+        .card-nickname { position: absolute; top: 232px; left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 8px var(--glow); text-transform: uppercase; z-index: 6; padding: 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         .divider { position: absolute; top: 254px; left: 28px; right: 28px; height: 1px; z-index: 5; background: linear-gradient(90deg, transparent, var(--c), transparent); opacity: .35; }
         .divider::before, .divider::after { content: ''; position: absolute; top: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--c); opacity: .8; box-shadow: 0 0 6px var(--c); }
         .divider::before { left: 0; }
@@ -158,7 +180,6 @@ export default function App() {
       {/* VIEW 1: LANDING PAGE */}
       {view === 'landing' && (
         <div className="min-h-screen bg-black relative overflow-hidden font-sans">
-          {/* Background Patterns */}
           <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
             <img src="/logo-white.png" alt="" className="absolute -top-[150px] -right-[150px] w-[600px] h-[600px] object-contain opacity-90" />
             <img src="/logo-green.png" alt="" className="absolute -bottom-[120px] -left-[150px] w-[700px] h-[700px] object-contain opacity-90" />
@@ -175,7 +196,21 @@ export default function App() {
           </header>
 
           <main className="relative z-10 flex flex-col items-center justify-center min-h-[70vh] px-4">
-            <div className="flex flex-col w-full max-w-2xl">
+            <div className="flex flex-col w-full max-w-2xl gap-4">
+              
+              {/* NICKNAME INPUT */}
+              <div className="relative w-full">
+                <input 
+                  type="text"
+                  placeholder="ENTER ALIAS (OPTIONAL)"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  maxLength={16}
+                  className="w-full bg-black/50 border border-zinc-700 hover:border-[#22c55e] text-white px-4 py-4 text-center font-bold tracking-widest uppercase focus:outline-none focus:border-[#22c55e] transition-colors placeholder:text-zinc-600"
+                />
+              </div>
+
+              {/* UPLOAD BOX */}
               <div className="relative w-full group cursor-pointer">
                 <input 
                   type="file" 
@@ -183,10 +218,10 @@ export default function App() {
                   onChange={handleImageUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <div className="w-full bg-black/50 border border-[#22c55e] text-white px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-black/80 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]">
-                  <UploadCloud size={32} className="text-[#22c55e]" />
-                  <span className="font-medium text-lg tracking-wide uppercase">Upload Photo to Initialize</span>
-                  <span className="text-sm text-gray-500">JPG, PNG supported</span>
+                <div className="w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+                  <UploadCloud size={32} />
+                  <span className="font-bold text-lg tracking-wide uppercase">Initialize Sequence</span>
+                  <span className="text-sm opacity-70">Upload Photo (JPG, PNG)</span>
                 </div>
               </div>
             </div>
@@ -204,11 +239,16 @@ export default function App() {
           
           <header className="w-full bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex justify-between items-center z-20">
             <button 
-              onClick={() => { setView('landing'); setUserImage(null); setAssignedSquad(null); }}
+              onClick={() => { 
+                setView('landing'); 
+                setUserImage(null); 
+                setAssignedSquad(null); 
+                setRerollsLeft(0); 
+              }}
               className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
             >
               <ArrowLeft size={20} />
-              <span className="font-medium">Back to Upload</span>
+              <span className="font-medium">Back to Start</span>
             </button>
           </header>
 
@@ -217,10 +257,6 @@ export default function App() {
             <div className="flex-1 bg-zinc-950 flex items-center justify-center p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
               
-              {/* THE DYNAMIC CSS CARD 
-                Wrapped in a transform scale so it looks big on desktop, 
-                but maintains its exact 280x380 aspect ratio for the export script.
-              */}
               {assignedSquad && currentTemplateData && (
                 <div className="scale-110 md:scale-[1.3] lg:scale-[1.5] transition-transform">
                   <div 
@@ -232,7 +268,6 @@ export default function App() {
                       <div className="scanlines"></div>
                       <div className="rune-strip">{currentTemplateData.rune}</div>
                       
-                      {/* Inject the Custom SVG exactly as written */}
                       <svg 
                         className="deco-svg" 
                         viewBox="0 0 280 380" 
@@ -240,7 +275,6 @@ export default function App() {
                         dangerouslySetInnerHTML={{ __html: currentTemplateData.svg }} 
                       />
                       
-                      {/* Central Image Mask */}
                       <div className="portrait-wrap">
                         <div className="portrait-ring-outer"></div>
                         <div className="portrait-ring-inner"></div>
@@ -253,6 +287,11 @@ export default function App() {
                             />
                           )}
                         </div>
+                      </div>
+
+                      {/* NEW: The injected Nickname directly on the card */}
+                      <div className="card-nickname">
+                        {nickname.trim() || 'INITIATE'}
                       </div>
 
                       <div className="divider"></div>
@@ -272,14 +311,30 @@ export default function App() {
               )}
             </div>
 
-            <aside className="w-full lg:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col h-full shadow-2xl z-20">
+            <aside className="w-full lg:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col h-full shadow-2xl z-20 overflow-y-auto">
               <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
                 <h2 className="text-lg font-bold text-white uppercase tracking-wider">Protocol Data</h2>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col justify-center">
+              <div className="flex-1 p-6 space-y-6 flex flex-col">
+                
+                {/* ALIAS EDIT FIELD */}
+                <div className="space-y-2">
+                  <label className="text-xs text-zinc-500 font-bold tracking-widest uppercase flex items-center gap-2">
+                    <User size={14} /> Update Alias
+                  </label>
+                  <input 
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    maxLength={16}
+                    placeholder="INITIATE"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-center text-white font-bold tracking-widest uppercase focus:outline-none focus:border-[#22c55e] transition-colors"
+                  />
+                </div>
+
                 {assignedSquad && (
-                  <div className="p-6 bg-zinc-950 border border-zinc-800 rounded-xl space-y-4 text-center">
+                  <div className="p-6 bg-zinc-950 border border-zinc-800 rounded-xl space-y-4 text-center mt-auto">
                     <p className="text-sm text-zinc-500 font-bold tracking-widest uppercase">Assigned Squad</p>
                     <div className="space-y-1">
                       <h3 className="text-4xl font-black uppercase tracking-tight" style={{ color: assignedSquad.color, fontFamily: 'Cinzel, serif' }}>
@@ -291,13 +346,23 @@ export default function App() {
                   </div>
                 )}
 
-                <button 
-                  onClick={randomizeIdentity}
-                  className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all border border-zinc-700"
-                >
-                  <Dices size={20} />
-                  REROLL IDENTITY
-                </button>
+                <div className="space-y-2">
+                  <button 
+                    onClick={handleRerollClick}
+                    disabled={rerollsLeft === 0}
+                    className={`w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border ${
+                      rerollsLeft === 0 
+                        ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
+                    }`}
+                  >
+                    <Dices size={20} />
+                    {rerollsLeft === 0 ? 'OUT OF REROLLS' : `REROLL IDENTITY (${rerollsLeft} LEFT)`}
+                  </button>
+                  <p className="text-xs text-center text-zinc-500">
+                    {rerollsLeft === 0 ? 'Your identity has been locked.' : 'Probability matrix engaged.'}
+                  </p>
+                </div>
               </div>
 
               <div className="p-6 border-t border-zinc-800 bg-zinc-950">
