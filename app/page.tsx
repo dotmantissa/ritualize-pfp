@@ -44,7 +44,6 @@ const TEMPLATES_DB = {
 };
 
 // --- FORTUNE COOKIE LORE ---
-// --- FORTUNE COOKIE LORE (WEB3 ROAST EDITION) ---
 const FORTUNES = {
   normie: [
     "You are the exit liquidity they warned you about.",
@@ -151,10 +150,10 @@ const FORTUNES = {
     "You hold enough governance tokens to dictate reality. Reality declines.",
     "You reached the top of the pyramid. Turns out, it's very lonely.",
     "You are the main character of a simulation that is about to be rebooted.",
-    "Your wallet is legendary. Your personality was deprecated in V1.",
-    "You bend the chain to your will. You still get rugged by emotional attachment.",
-    "You are a celestial entity of pure data. And you're currently slouching.",
-    "The prophecy is fulfilled: You won the game, and nobody cares."
+    "Your wallet is a statement. Your history is a manifesto. Your PFP is a warning.",
+    "You have executed, verified, ascended. The trilogy is complete.",
+    "The schelling point of all of web3 has a seat reserved for you. It's been there a while.",
+    "The ritual is complete. The ceremony remembers. So does the chain."
   ]
 };
 
@@ -237,7 +236,7 @@ export default function App() {
     }
   };
 
-const shareToX = async () => {
+  const shareToX = async () => {
     if (!assignedSquad || !nickname.trim() || !pfpRef.current) return;
     
     // 1. Automatically download the card to their device first
@@ -251,7 +250,7 @@ const shareToX = async () => {
     const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(xUrl, '_blank');
   };
-  
+
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
@@ -261,7 +260,7 @@ const shareToX = async () => {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Rajdhani:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;700&family=Rajdhani:wght@400;500;600&display=swap');
         
         .pfp-export-node * { box-sizing: border-box; margin: 0; padding: 0; }
         .pfp-export-node { font-family: 'Rajdhani', sans-serif; }
@@ -277,21 +276,24 @@ const shareToX = async () => {
         .corners span:nth-child(2) { top: 14px; right: 14px; border-width: 1.5px 1.5px 0 0; border-radius: 0 3px 0 0; }
         .corners span:nth-child(3) { bottom: 14px; left: 14px; border-width: 0 0 1.5px 1.5px; border-radius: 0 0 0 3px; }
         .corners span:nth-child(4) { bottom: 14px; right: 14px; border-width: 0 1.5px 1.5px 0; border-radius: 0 0 3px 0; }
-        .portrait-wrap { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; z-index: 5; }
+        
+        /* Compress vertically to fit header */
+        .portrait-wrap { position: absolute; top: 68px; left: 50%; transform: translateX(-50%); width: 180px; height: 180px; z-index: 5; }
         .portrait-ring-outer { position: absolute; inset: -7px; border-radius: 50%; border: 1.5px solid var(--c); box-shadow: 0 0 16px var(--glow), inset 0 0 12px var(--glow); }
         .portrait-ring-inner { position: absolute; inset: -2px; border-radius: 50%; border: 1px solid var(--c); opacity: .3; }
         .portrait-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; background: var(--pbg); position: relative; display: flex; align-items: center; justify-content: center; }
         
-        .card-nickname { position: absolute; top: 232px; left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 8px var(--glow); text-transform: uppercase; z-index: 6; padding: 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-nickname { position: absolute; top: 252px; left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 8px var(--glow); text-transform: uppercase; z-index: 6; padding: 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .divider { position: absolute; top: 254px; left: 28px; right: 28px; height: 1px; z-index: 5; background: linear-gradient(90deg, transparent, var(--c), transparent); opacity: .35; }
+        .divider { position: absolute; top: 274px; left: 28px; right: 28px; height: 1px; z-index: 5; background: linear-gradient(90deg, transparent, var(--c), transparent); opacity: .35; }
         .divider::before, .divider::after { content: ''; position: absolute; top: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--c); opacity: .8; box-shadow: 0 0 6px var(--c); }
         .divider::before { left: 0; }
         .divider::after { right: 0; }
         
-        .card-fortune { position: absolute; top: 265px; left: 24px; right: 24px; height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 10.5px; font-weight: 500; line-height: 1.3; color: var(--c); opacity: 0.75; font-style: italic; z-index: 6; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+        .card-fortune { position: absolute; top: 285px; left: 24px; right: 24px; height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 10.5px; font-weight: 500; line-height: 1.3; color: var(--c); opacity: 0.75; font-style: italic; z-index: 6; text-shadow: 0 0 4px rgba(0,0,0,0.8); overflow: hidden; }
 
-        .badge { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 6; width: 240px; }
+        /* Compressed badge spacing */
+        .badge { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 6; width: 240px; }
         .badge-tier { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 12px var(--glow); display: block; margin-bottom: 3px; }
         .badge-sub { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .25em; color: var(--c); opacity: .45; text-transform: uppercase; display: block; }
         .hex-id { position: absolute; top: 16px; right: 18px; font-family: 'Rajdhani', sans-serif; font-size: 8.5px; font-weight: 500; letter-spacing: .12em; color: var(--c); opacity: .3; z-index: 6; }
@@ -310,6 +312,11 @@ const shareToX = async () => {
         .scanlines { position: absolute; inset: 0; z-index: 3; background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.07) 3px, rgba(0,0,0,.07) 4px); border-radius: 16px; pointer-events: none; }
         .rune-strip { position: absolute; top: 0; left: 0; right: 0; height: 38px; z-index: 4; display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 1px solid var(--c); opacity: .18; font-size: 10px; letter-spacing: .2em; color: var(--c); font-family: 'Rajdhani', sans-serif; font-weight: 600; }
         .deco-svg { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+        /* NEW: Native Protocol Header */
+        .card-header { position: absolute; top: 38px; left: 0; width: 100%; height: 26px; display: flex; align-items: center; justify-content: center; gap: 6px; z-index: 4; text-align: center; }
+        .card-header-logo { height: 14px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.8; }
+        .card-header-text { font-family: 'Cinzel Decorative', serif; font-size: 12px; font-weight: 700; color: var(--c); text-shadow: 0 0 10px var(--glow); text-transform: uppercase; letter-spacing: 0.05em; }
       `}} />
 
       {/* VIEW 1: LANDING PAGE */}
@@ -406,6 +413,13 @@ const shareToX = async () => {
                       <div className="bg"></div>
                       <div className="scanlines"></div>
                       <div className="rune-strip">{currentTemplateData.rune}</div>
+
+                      {/* NEW: Dynamic Protocol Header with tined black logos */}
+                      <div className="card-header">
+                        <img src="/logo-black.png" alt="" className="card-header-logo" />
+                        <span className="card-header-text">Ritual</span>
+                        <img src="/logo-black.png" alt="" className="card-header-logo" />
+                      </div>
                       
                       <svg 
                         className="deco-svg" 
