@@ -43,6 +43,120 @@ const TEMPLATES_DB = {
   ]
 };
 
+// --- FORTUNE COOKIE LORE ---
+const FORTUNES = {
+  normie: [
+    "The blockchain doesn't know your name yet. Neither does anyone else.",
+    "You joined just in time to be fashionably late to something you don't fully understand.",
+    "Your wallet is empty but your vibes are immaculate. Balance your portfolio accordingly.",
+    "The smart contract is smarter than you today. Tomorrow is a new day. Probably.",
+    "You are the net-new user they were building this for. No pressure.",
+    "Somewhere, a node is running. You are not that node.",
+    "Every legend was once a normie who kept showing up. Keep showing up.",
+    "You have not been verified. You have not been rejected either. You are simply... pending.",
+    "The ritual has begun. You are still reading the instructions.",
+    "Your transaction is processing. Much like your understanding of any of this.",
+    "They said 'be early.' You are here. This counts.",
+    "The chain is trustless. Your confidence does not have to be.",
+    "A wise person once said 'GM.' That person was also a normie once.",
+    "You are decentralized in spirit. Centralized in confusion.",
+    "The protocol welcomes you with open arms and zero explanations.",
+    "Fortune favors the curious. Curiosity is free. Start there.",
+    "Not every ceremony requires a robe. But it helps. Acquire a robe.",
+    "The oracle has no predictions for you yet. Check back after you do something.",
+    "You are on-chain now. What you do with that information is your first test.",
+    "Even the highest node was once just a person clicking 'connect wallet.'"
+  ],
+  bitty: [
+    "You understand approximately 40% of what's happening here. That puts you ahead of most.",
+    "The compute is heterogeneous. Your commitment to this project, however, is not.",
+    "You are not lost. You are just pathfinding on a chain that hasn't indexed you yet.",
+    "Small moves, executed once, verified many times. That's the spirit.",
+    "The signal is real. The noise is also real. You are learning to tell the difference.",
+    "You have graduated from 'what is a wallet' to 'what is a proof.' Growth.",
+    "A little blue goes a long way. So does a little faith in the protocol.",
+    "You asked the right question. The answer will arrive in a future block.",
+    "The network sees you. It's mostly indifferent, but it sees you.",
+    "You are the kind of person who reads the documentation. Partially. Respect.",
+    "Your on-chain footprint is small. Your off-chain potential is undocumented.",
+    "You have a node inside you. It just hasn't opted into execution yet.",
+    "Consensus is hard. You got here anyway. That's a form of agreement.",
+    "The scheduled transaction of your success has been queued. Block time: unknown.",
+    "You are not just a user. You are a data point in someone's AI training set. Behave accordingly.",
+    "Proof of effort is not a consensus mechanism. But it should be. You'd win.",
+    "The chain is censorship-resistant. Your doubts, unfortunately, are not.",
+    "Something is being computed on your behalf right now. Try to deserve it.",
+    "Bit by bit, the ritual reveals itself. You have found the first bit.",
+    "You are building toward something. The scaffolding is messy. That's fine."
+  ],
+  ritty: [
+    "You are deep enough in to be dangerous and not deep enough in to be right. Welcome.",
+    "The purple aura is real. So is the fact that you owe someone a reply on Discord.",
+    "You have strong opinions about things you learned about two weeks ago. Cherish this phase.",
+    "Halfway to enlightenment is still halfway to somewhere interesting.",
+    "You can explain this to your friends. They will not understand. Explain it anyway.",
+    "The network is decentralized. Your sleep schedule is not. Fix one of these.",
+    "A Ritty with conviction is a force. A Ritty without sleep is a bug.",
+    "You have been summoned. The paperwork is still processing.",
+    "Three out of five runes are aligned in your favor. The other two are 'just vibes.'",
+    "You are in the middle of something historic. Unfortunately, you're also in the middle of your second coffee.",
+    "The protocol doesn't sleep. You, on the other hand, should.",
+    "You've entered a phase where things that once seemed complicated now seem complicated differently. Progress.",
+    "Your energy is chaotic and your conviction is real. The chain respects both.",
+    "Not every inference needs to be verified. Your lunch order, however, does.",
+    "You are the anomaly in someone's smooth execution layer. Own it.",
+    "The nodes are specializing. Have you considered specializing in anything other than memes?",
+    "A Ritty who questions is more valuable than a Ritualist who doesn't. Quote this back to them.",
+    "The oracle has spoken: you are exactly where you need to be, which is slightly confused.",
+    "Your wallet knows something your brain hasn't admitted yet.",
+    "Somewhere between normie and enlightenment, you found the best parties."
+  ],
+  ritualist: [
+    "You have stared into the compute layer. The compute layer has indexed you back.",
+    "The ceremony is not for show. Except for the parts that are. You know which parts.",
+    "You carry the protocol in your posture. Walk accordingly.",
+    "Others seek permission. You seek proof. There's a difference. You know it.",
+    "The smart contract trusts you. Approximately. Within the parameters you defined.",
+    "You are not early anymore. You are exactly on time. That's rarer.",
+    "Your presence on-chain is a statement. Your absence is a scheduled transaction.",
+    "The ritual works because people like you take it seriously. Don't ruin it by being humble.",
+    "You have verified things that others took on faith. Keep verifying.",
+    "The network is better with you in it. It just won't say so directly.",
+    "You have done the thing that required doing. The chain has noted this in an immutable log.",
+    "Not all who execute are seen. You have been seen.",
+    "You have earned the green. Wear it like a proof, not a trophy.",
+    "The consensus is in: you belong here.",
+    "You understand the ceremony well enough to know when to skip the ritual and when to honor it.",
+    "A Ritualist knows that the most powerful invocation is a well-written smart contract.",
+    "Your on-chain history reads like lore. Someone will reference it one day without knowing it's you.",
+    "The network rewards consistency. You have been consistent. The network has been taking notes.",
+    "Trust is scarce. Proof is cheaper. You chose proof. Wise.",
+    "You are the kind of person the whitepaper was imagining. Try not to let it go to your head."
+  ],
+  ascendant: [
+    "You did not find the protocol. The protocol found you and decided it was ready.",
+    "The crown is weightless to those who were always meant to wear it.",
+    "You have ascended. The view is excellent. The responsibility is enormous. Act normal.",
+    "The chain bends not for kings, but it runs a little smoother when you're watching.",
+    "You are the proof of concept that shipped.",
+    "Others dream of decentralization. You are part of it.",
+    "The ceremony recognizes you. You barely had to show up — but you did anyway, and that matters.",
+    "You are not a user. You are infrastructure with a face.",
+    "The oracle predicted your rise before you believed in it yourself.",
+    "An Ascendant does not seek validation from the network. The network seeks validation from them.",
+    "You have become a reference point. Other people's transactions are measured against your standard.",
+    "The compute nods. The consensus aligns. The cat approves.",
+    "Some people read documentation. You became documentation.",
+    "You were built different. Fortunately, the architecture supports heterogeneous compute.",
+    "The protocol doesn't sleep, and neither do you. One of you chose this. The other is just code.",
+    "Not many make it here. Fewer still deserve it. The intersection of those two sets contains you.",
+    "Your wallet is a statement. Your history is a manifesto. Your PFP is a warning.",
+    "You have executed, verified, ascended. The trilogy is complete.",
+    "The schelling point of all of web3 has a seat reserved for you. It's been there a while.",
+    "The ritual is complete. The ceremony remembers. So does the chain."
+  ]
+};
+
 const SQUADS = [
   { name: 'Normie', class: 'normie', color: '#ACA9A9', level: 'Tier V' },
   { name: 'Bitty', class: 'bitty', color: '#3498DB', level: 'Tier IV' },
@@ -54,42 +168,43 @@ const SQUADS = [
 export default function App() {
   const [view, setView] = useState<'landing' | 'editor'>('landing');
   const [userImage, setUserImage] = useState<string | null>(null);
-  const [nickname, setNickname] = useState<string>(''); // State for the nickname
+  const [nickname, setNickname] = useState<string>(''); 
   const [assignedSquad, setAssignedSquad] = useState<typeof SQUADS[0] | null>(null);
   const [templateNum, setTemplateNum] = useState<number>(0);
   const [rerollsLeft, setRerollsLeft] = useState<number>(0);
+  const [fortune, setFortune] = useState<string>('');
   const pfpRef = useRef<HTMLDivElement>(null);
 
   const randomizeIdentity = () => {
     const roll = Math.random() * 100;
     
     let squadIndex = 0; 
-    
-    if (roll < 45) {
-      squadIndex = 0; // Normie (45%)
-    } else if (roll < 75) {
-      squadIndex = 1; // Bitty (30%)
-    } else if (roll < 90) {
-      squadIndex = 2; // Ritty (15%)
-    } else if (roll < 98) {
-      squadIndex = 3; // Ritualist (8%)
-    } else {
-      squadIndex = 4; // Ascendant Ritualist (2%)
-    }
+    if (roll < 45) { squadIndex = 0; } 
+    else if (roll < 75) { squadIndex = 1; } 
+    else if (roll < 90) { squadIndex = 2; } 
+    else if (roll < 98) { squadIndex = 3; } 
+    else { squadIndex = 4; }
 
-    const randomTemplateNumber = Math.floor(Math.random() * 5); // 0-4 for array index
-    setAssignedSquad(SQUADS[squadIndex]);
+    const selectedSquad = SQUADS[squadIndex];
+    const randomTemplateNumber = Math.floor(Math.random() * 5); 
+    
+    // Pick random fortune
+    const squadFortunes = FORTUNES[selectedSquad.class as keyof typeof FORTUNES];
+    const randomFortune = squadFortunes[Math.floor(Math.random() * squadFortunes.length)];
+
+    setAssignedSquad(selectedSquad);
     setTemplateNum(randomTemplateNumber);
+    setFortune(randomFortune);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && nickname.trim()) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserImage(reader.result as string);
-        setRerollsLeft(Math.floor(Math.random() * 3) + 1); // Grants 1, 2, or 3 rerolls randomly
-        randomizeIdentity(); // Initial free roll
+        setRerollsLeft(Math.floor(Math.random() * 3) + 1); 
+        randomizeIdentity(); 
         setView('editor');
       };
       reader.readAsDataURL(file);
@@ -97,14 +212,14 @@ export default function App() {
   };
 
   const handleRerollClick = () => {
-    if (rerollsLeft > 0) {
+    if (rerollsLeft > 0 && nickname.trim()) {
       randomizeIdentity();
       setRerollsLeft(prev => prev - 1);
     }
   };
 
   const exportPFP = async () => {
-    if (pfpRef.current) {
+    if (pfpRef.current && nickname.trim()) {
       try {
         const dataUrl = await toPng(pfpRef.current, { 
           cacheBust: true, 
@@ -112,7 +227,7 @@ export default function App() {
           backgroundColor: '#080808'
         });
         const link = document.createElement('a');
-        link.download = `ritual-card-${assignedSquad?.name.replace(' ', '-')}-${Date.now()}.png`;
+        link.download = `ritual-card-${nickname.trim().replace(/\s+/g, '-')}-${Date.now()}.png`;
         link.href = dataUrl;
         link.click();
       } catch (err) {
@@ -124,6 +239,8 @@ export default function App() {
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
+
+  const isAliasMissing = !nickname.trim();
 
   return (
     <>
@@ -149,13 +266,16 @@ export default function App() {
         .portrait-ring-inner { position: absolute; inset: -2px; border-radius: 50%; border: 1px solid var(--c); opacity: .3; }
         .portrait-circle { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; background: var(--pbg); position: relative; display: flex; align-items: center; justify-content: center; }
         
-        /* NEW: The Nickname Class perfectly nestled under the image */
         .card-nickname { position: absolute; top: 232px; left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 8px var(--glow); text-transform: uppercase; z-index: 6; padding: 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .divider { position: absolute; top: 254px; left: 28px; right: 28px; height: 1px; z-index: 5; background: linear-gradient(90deg, transparent, var(--c), transparent); opacity: .35; }
         .divider::before, .divider::after { content: ''; position: absolute; top: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--c); opacity: .8; box-shadow: 0 0 6px var(--c); }
         .divider::before { left: 0; }
         .divider::after { right: 0; }
+        
+        /* NEW: Fortune Cookie Text Area */
+        .card-fortune { position: absolute; top: 265px; left: 24px; right: 24px; height: 40px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'Rajdhani', sans-serif; font-size: 10.5px; font-weight: 500; line-height: 1.3; color: var(--c); opacity: 0.75; font-style: italic; z-index: 6; text-shadow: 0 0 4px rgba(0,0,0,0.8); }
+
         .badge { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 6; width: 240px; }
         .badge-tier { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--c); letter-spacing: .15em; text-shadow: 0 0 12px var(--glow); display: block; margin-bottom: 3px; }
         .badge-sub { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .25em; color: var(--c); opacity: .45; text-transform: uppercase; display: block; }
@@ -198,11 +318,10 @@ export default function App() {
           <main className="relative z-10 flex flex-col items-center justify-center min-h-[70vh] px-4">
             <div className="flex flex-col w-full max-w-2xl gap-4">
               
-              {/* NICKNAME INPUT */}
               <div className="relative w-full">
                 <input 
                   type="text"
-                  placeholder="ENTER ALIAS (OPTIONAL)"
+                  placeholder="ENTER ALIAS (REQUIRED)"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   maxLength={16}
@@ -210,18 +329,22 @@ export default function App() {
                 />
               </div>
 
-              {/* UPLOAD BOX */}
-              <div className="relative w-full group cursor-pointer">
+              <div className={`relative w-full group ${!isAliasMissing ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
                 <input 
                   type="file" 
                   accept="image/*" 
+                  disabled={isAliasMissing}
                   onChange={handleImageUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  className={`absolute inset-0 w-full h-full z-10 ${!isAliasMissing ? 'cursor-pointer opacity-0' : 'hidden'}`}
                 />
-                <div className="w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+                <div className={`w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all ${!isAliasMissing ? 'group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]' : ''}`}>
                   <UploadCloud size={32} />
-                  <span className="font-bold text-lg tracking-wide uppercase">Initialize Sequence</span>
-                  <span className="text-sm opacity-70">Upload Photo (JPG, PNG)</span>
+                  <span className="font-bold text-lg tracking-wide uppercase">
+                    {!isAliasMissing ? 'Initialize Sequence' : 'Awaiting Alias...'}
+                  </span>
+                  <span className="text-sm opacity-70">
+                    {!isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Alias to Unlock Upload'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -244,6 +367,7 @@ export default function App() {
                 setUserImage(null); 
                 setAssignedSquad(null); 
                 setRerollsLeft(0); 
+                setFortune('');
               }}
               className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
             >
@@ -289,12 +413,16 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* NEW: The injected Nickname directly on the card */}
                       <div className="card-nickname">
-                        {nickname.trim() || 'INITIATE'}
+                        {nickname.trim() || 'UNKNOWN'}
                       </div>
 
                       <div className="divider"></div>
+                      
+                      {/* NEW: Fortune Cookie Text */}
+                      <div className="card-fortune">
+                        "{fortune}"
+                      </div>
                       
                       <div className="badge">
                         <span className="badge-tier">{assignedSquad.name}</span>
@@ -318,7 +446,6 @@ export default function App() {
 
               <div className="flex-1 p-6 space-y-6 flex flex-col">
                 
-                {/* ALIAS EDIT FIELD */}
                 <div className="space-y-2">
                   <label className="text-xs text-zinc-500 font-bold tracking-widest uppercase flex items-center gap-2">
                     <User size={14} /> Update Alias
@@ -328,8 +455,8 @@ export default function App() {
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     maxLength={16}
-                    placeholder="INITIATE"
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-center text-white font-bold tracking-widest uppercase focus:outline-none focus:border-[#22c55e] transition-colors"
+                    placeholder="REQUIRED"
+                    className={`w-full bg-zinc-950 border rounded-lg p-3 text-center text-white font-bold tracking-widest uppercase focus:outline-none transition-colors ${isAliasMissing ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-[#22c55e]'}`}
                   />
                 </div>
 
@@ -349,9 +476,9 @@ export default function App() {
                 <div className="space-y-2">
                   <button 
                     onClick={handleRerollClick}
-                    disabled={rerollsLeft === 0}
+                    disabled={rerollsLeft === 0 || isAliasMissing}
                     className={`w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border ${
-                      rerollsLeft === 0 
+                      rerollsLeft === 0 || isAliasMissing
                         ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
                         : 'bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
                     }`}
@@ -368,7 +495,12 @@ export default function App() {
               <div className="p-6 border-t border-zinc-800 bg-zinc-950">
                 <button 
                   onClick={exportPFP}
-                  className="w-full py-4 bg-[#22c55e] hover:bg-[#1ea550] text-black font-black rounded-xl flex items-center justify-center gap-2 transition-all"
+                  disabled={isAliasMissing}
+                  className={`w-full py-4 font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
+                    isAliasMissing 
+                      ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' 
+                      : 'bg-[#22c55e] hover:bg-[#1ea550] text-black'
+                  }`}
                 >
                   <Download size={20} />
                   DOWNLOAD CARD
