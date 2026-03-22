@@ -362,10 +362,10 @@ export default function App() {
                 <div className={`w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all ${!isAliasMissing ? 'group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]' : ''}`}>
                   <UploadCloud size={32} />
                   <span className="font-bold text-lg tracking-wide uppercase">
-                    {!isAliasMissing ? 'Get the Carding Started' : 'Awaiting Alias...'}
+                    {!isAliasMissing ? 'Get the Carding Started' : 'Awaiting Username...'}
                   </span>
                   <span className="text-sm opacity-70">
-                    {!isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Alias to Unlock Upload'}
+                    {!isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Username to Unlock Upload'}
                   </span>
                 </div>
               </div>
