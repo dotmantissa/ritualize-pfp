@@ -343,7 +343,7 @@ export default function App() {
               <div className="relative w-full">
                 <input 
                   type="text"
-                  placeholder="ENTER ALIAS (REQUIRED)"
+                  placeholder="DISCORD USERNAME (REQUIRED)"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   maxLength={16}
@@ -362,7 +362,7 @@ export default function App() {
                 <div className={`w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all ${!isAliasMissing ? 'group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]' : ''}`}>
                   <UploadCloud size={32} />
                   <span className="font-bold text-lg tracking-wide uppercase">
-                    {!isAliasMissing ? 'Initialize Sequence' : 'Awaiting Alias...'}
+                    {!isAliasMissing ? 'Get the Carding Started' : 'Awaiting Alias...'}
                   </span>
                   <span className="text-sm opacity-70">
                     {!isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Alias to Unlock Upload'}
@@ -468,15 +468,11 @@ export default function App() {
             </div>
 
             <aside className="w-full lg:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col h-full shadow-2xl z-20 overflow-y-auto">
-              <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
-                <h2 className="text-lg font-bold text-white uppercase tracking-wider">Protocol Data</h2>
-              </div>
-
               <div className="flex-1 p-6 space-y-6 flex flex-col">
                 
                 <div className="space-y-2">
                   <label className="text-xs text-zinc-500 font-bold tracking-widest uppercase flex items-center gap-2">
-                    <User size={14} /> Update Alias
+                    <User size={14} /> Update Username
                   </label>
                   <input 
                     type="text"
@@ -515,7 +511,7 @@ export default function App() {
                     {rerollsLeft === 0 ? 'OUT OF REROLLS' : `REROLL IDENTITY (${rerollsLeft} LEFT)`}
                   </button>
                   <p className="text-xs text-center text-zinc-500">
-                    {rerollsLeft === 0 ? 'Your identity has been locked.' : 'Probability matrix engaged.'}
+                    {rerollsLeft === 0 ? 'Your identity has been locked.' : 'Might spawn a lower rank.'}
                   </p>
                 </div>
               </div>
@@ -544,7 +540,7 @@ export default function App() {
                   }`}
                 >
                   <Share2 size={20} />
-                  BROADCAST TO X
+                  SHARE TO X
                 </button>
               </div>
             </aside>
