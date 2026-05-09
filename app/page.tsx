@@ -210,6 +210,10 @@ export default function App() {
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMintedForWallet, setIsMintedForWallet] = useState<boolean>(false);
   const pfpRef = useRef<HTMLDivElement>(null);
+  const providerRef = useRef<BrowserProvider | null>(null);
+  const readContractRef = useRef<Contract | null>(null);
+  const writeContractRef = useRef<Contract | null>(null);
+  const initialSquadRef = useRef<string | null>(null);
 
   const getStorageKey = (wallet: string) => `${MINT_STORAGE_PREFIX}${wallet.toLowerCase()}`;
   const hasWallet = Boolean(walletAddress);
@@ -217,17 +221,27 @@ export default function App() {
   const getEvm = () => (window as any).ethereum;
 
   const getReadContract = async () => {
-    const provider = new BrowserProvider(getEvm());
-    return new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
+    if (readContractRef.current) return readContractRef.current;
+    const provider = providerRef.current ?? new BrowserProvider(getEvm());
+    providerRef.current = provider;
+    const contract = new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
+    readContractRef.current = contract;
+    return contract;
   };
 
   const getWriteContract = async () => {
-    const provider = new BrowserProvider(getEvm());
+    if (writeContractRef.current) return writeContractRef.current;
+    const provider = providerRef.current ?? new BrowserProvider(getEvm());
+    providerRef.current = provider;
     const signer = await provider.getSigner();
-    return new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+    const contract = new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+    writeContractRef.current = contract;
+    return contract;
   };
 
-  const randomizeIdentity = () => {
+  const randomizeIdentity = (excludeSquads: string[] = []) => {
+    const eligibleSquads = SQUADS.filter((s) => !excludeSquads.includes(s.name));
+    const source = eligibleSquads.length > 0 ? eligibleSquads : SQUADS;
     const roll = Math.random() * 100;
     
     let squadIndex = 0; 
@@ -237,7 +251,7 @@ export default function App() {
     else if (roll < 98) { squadIndex = 3; } 
     else { squadIndex = 4; }
 
-    const selectedSquad = SQUADS[squadIndex];
+    const selectedSquad = source[Math.min(squadIndex, source.length - 1)];
     const randomTemplateNumber = Math.floor(Math.random() * 5); 
     
     // Pick random fortune
@@ -247,6 +261,7 @@ export default function App() {
     setAssignedSquad(selectedSquad);
     setTemplateNum(randomTemplateNumber);
     setFortune(randomFortune);
+    return selectedSquad;
   };
 
   const loadMintRecord = (wallet: string) => {
@@ -261,6 +276,7 @@ export default function App() {
       setNickname(record.nickname);
       setUserImage(record.userImage);
       setAssignedSquad(squad);
+      initialSquadRef.current = squad.name;
       setTemplateNum(record.templateNum);
       setFortune(record.fortune);
       setMintTxHash(record.txHash);
@@ -307,6 +323,10 @@ export default function App() {
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
       const wallet = accounts?.[0];
       if (!wallet) return;
+      providerRef.current = new BrowserProvider(ethereum);
+      readContractRef.current = new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, providerRef.current);
+      const signer = await providerRef.current.getSigner();
+      writeContractRef.current = new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
 
       try {
         await ethereum.request({
@@ -338,7 +358,9 @@ export default function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserImage(reader.result as string);
-        randomizeIdentity(); 
+        initialSquadRef.current = null;
+        const firstSquad = randomizeIdentity(); 
+        initialSquadRef.current = firstSquad.name;
         setView('editor');
       };
       reader.readAsDataURL(file);
@@ -349,9 +371,17 @@ export default function App() {
     if (rerollsLeft <= 0 || !nickname.trim() || isIdentityLocked) return;
     try {
       const contract = await getWriteContract();
-      const tx = await contract.consumeReroll();
+      const tx = await contract.consumeReroll({ gasLimit: 140000 });
       await tx.wait();
-      randomizeIdentity();
+      const currentSquadName = assignedSquad?.name || '';
+      const excludes = [currentSquadName];
+      if (rerollsLeft === 1 && initialSquadRef.current) {
+        excludes.push(initialSquadRef.current);
+      }
+      randomizeIdentity(excludes);
+      if (!initialSquadRef.current && currentSquadName) {
+        initialSquadRef.current = currentSquadName;
+      }
       const refreshedContract = await getReadContract();
       const remainingRerolls = Number(await refreshedContract.rerollsRemaining(walletAddress));
       setRerollsLeft(remainingRerolls);
