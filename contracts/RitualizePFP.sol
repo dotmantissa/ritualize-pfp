@@ -14,13 +14,18 @@ contract RitualizePFP is ERC721, Ownable {
     }
 
     uint256 private _nextTokenId = 1;
+    uint8 public constant MAX_REROLLS = 2;
     mapping(address => bool) public hasMinted;
+    mapping(address => uint8) public rerollsUsed;
     mapping(address => Profile) private _profiles;
     mapping(uint256 => string) private _tokenUris;
 
     error AlreadyMinted();
+    error MintedIdentityLocked();
+    error NoRerollsLeft();
 
     event RoleMinted(address indexed user, uint256 indexed tokenId, string username, string role, string tokenURI);
+    event RerollConsumed(address indexed user, uint8 rerollsUsed, uint8 rerollsRemaining);
 
     constructor(address initialOwner) ERC721("Ritualize PFP", "RPFP") Ownable(initialOwner) {}
 
@@ -42,6 +47,23 @@ contract RitualizePFP is ERC721, Ownable {
         });
 
         emit RoleMinted(msg.sender, tokenId, username, role, uri);
+    }
+
+    function consumeReroll() external {
+        if (hasMinted[msg.sender]) revert MintedIdentityLocked();
+        uint8 used = rerollsUsed[msg.sender];
+        if (used >= MAX_REROLLS) revert NoRerollsLeft();
+        unchecked {
+            used += 1;
+        }
+        rerollsUsed[msg.sender] = used;
+        emit RerollConsumed(msg.sender, used, MAX_REROLLS - used);
+    }
+
+    function rerollsRemaining(address user) external view returns (uint8) {
+        uint8 used = rerollsUsed[user];
+        if (used >= MAX_REROLLS) return 0;
+        return MAX_REROLLS - used;
     }
 
     function profileOf(address user) external view returns (Profile memory) {

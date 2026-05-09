@@ -169,11 +169,13 @@ const SQUADS = [
 const RITUAL_CHAIN_HEX = '0x7bb';
 const RITUAL_CHAIN_ID = 1979;
 const MINT_STORAGE_PREFIX = 'ritualize-minted-v1:';
-const NFT_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_NFT_CONTRACT || '0x2ca8B7BC0F9020bC35d40be6530eAac04924B619') as string;
+const NFT_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_NFT_CONTRACT || '0x1491b4b31A04a6EB97410B5c7A6964cd007D3Cc1') as string;
 const NFT_ABI = [
   'function hasMinted(address) view returns (bool)',
+  'function rerollsRemaining(address) view returns (uint8)',
   'function profileOf(address) view returns ((string username,string role,string tokenURI,uint256 mintedAt,uint256 tokenId))',
-  'function mint(string username,string role,string uri) returns (uint256)'
+  'function mint(string username,string role,string uri) returns (uint256)',
+  'function consumeReroll()'
 ];
 const RITUAL_CHAIN_CONFIG = {
   chainId: RITUAL_CHAIN_HEX,
@@ -247,30 +249,9 @@ export default function App() {
     setFortune(randomFortune);
   };
 
-  const utf8ToHex = (value: string) => {
-    return `0x${Array.from(new TextEncoder().encode(value))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')}`;
-  };
-
-  const waitForReceipt = async (txHash: string) => {
-    const ethereum = (window as any).ethereum;
-    for (let i = 0; i < 60; i++) {
-      const receipt = await ethereum.request({
-        method: 'eth_getTransactionReceipt',
-        params: [txHash]
-      });
-      if (receipt) return receipt;
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
-    throw new Error('Timed out waiting for transaction confirmation');
-  };
-
   const loadMintRecord = (wallet: string) => {
     const raw = localStorage.getItem(getStorageKey(wallet));
     if (!raw) {
-      setIsMintedForWallet(false);
-      setMintTxHash('');
       return;
     }
     try {
@@ -287,18 +268,19 @@ export default function App() {
       setIsMintedForWallet(true);
       setView('editor');
     } catch {
-      setIsMintedForWallet(false);
-      setMintTxHash('');
+      return;
     }
   };
 
   const loadMintStateFromChain = async (wallet: string) => {
     const contract = await getReadContract();
     const minted = await contract.hasMinted(wallet);
+    const remainingRerolls = Number(await contract.rerollsRemaining(wallet));
+    setRerollsLeft(remainingRerolls);
     if (!minted) {
       setIsMintedForWallet(false);
       setMintTxHash('');
-      return;
+      return false;
     }
     const profile = await contract.profileOf(wallet);
     const squad = SQUADS.find((s) => s.name === profile.role);
@@ -311,6 +293,7 @@ export default function App() {
       setIsMintedForWallet(true);
       setView('editor');
     }
+    return true;
   };
 
   const connectWallet = async () => {
@@ -338,8 +321,10 @@ export default function App() {
       }
 
       setWalletAddress(wallet);
-      await loadMintStateFromChain(wallet);
-      loadMintRecord(wallet);
+      const minted = await loadMintStateFromChain(wallet);
+      if (minted) {
+        loadMintRecord(wallet);
+      }
     } catch (error) {
       console.error('Wallet connection failed', error);
     } finally {
@@ -353,7 +338,6 @@ export default function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserImage(reader.result as string);
-        setRerollsLeft(Math.floor(Math.random() * 3) + 1); 
         randomizeIdentity(); 
         setView('editor');
       };
@@ -361,10 +345,19 @@ export default function App() {
     }
   };
 
-  const handleRerollClick = () => {
-    if (rerollsLeft > 0 && nickname.trim() && !isIdentityLocked) {
+  const handleRerollClick = async () => {
+    if (rerollsLeft <= 0 || !nickname.trim() || isIdentityLocked) return;
+    try {
+      const contract = await getWriteContract();
+      const tx = await contract.consumeReroll();
+      await tx.wait();
       randomizeIdentity();
-      setRerollsLeft(prev => prev - 1);
+      const refreshedContract = await getReadContract();
+      const remainingRerolls = Number(await refreshedContract.rerollsRemaining(walletAddress));
+      setRerollsLeft(remainingRerolls);
+    } catch (error) {
+      console.error('Reroll failed', error);
+      alert('Reroll failed or was rejected.');
     }
   };
 
