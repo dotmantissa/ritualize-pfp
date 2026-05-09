@@ -169,7 +169,7 @@ const SQUADS = [
 const RITUAL_CHAIN_HEX = '0x7bb';
 const RITUAL_CHAIN_ID = 1979;
 const MINT_STORAGE_PREFIX = 'ritualize-minted-v1:';
-const NFT_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_NFT_CONTRACT || '0x1491b4b31A04a6EB97410B5c7A6964cd007D3Cc1') as string;
+const NFT_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_NFT_CONTRACT || '0xffe99D64e7EC4c50bC804e3e20f66434e5d07329') as string;
 const NFT_ABI = [
   'function hasMinted(address) view returns (bool)',
   'function rerollsRemaining(address) view returns (uint8)',
