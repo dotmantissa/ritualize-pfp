@@ -2,11 +2,12 @@
 
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft, Image as ImageIcon, Dices, UploadCloud, User, Share2 } from 'lucide-react';
+import { Download, ArrowLeft, Dices, UploadCloud, User, Share2, Wallet, CheckCircle2 } from 'lucide-react';
+import { BrowserProvider, Contract } from 'ethers';
 
 // --- DATA DICTIONARY FOR THE 25 TEMPLATES ---
 const TEMPLATES_DB = {
-  'Ascendant Ritualist': [
+  'Radiant Ritualist': [
     { rune: '✦ ᚱᛁᛏᚢᚨᛚ ✦ ᚨᛋᚲᛖᚾᛞᚨᚾᛏ ✦', hex: '0x4D1A', svg: '<g opacity=".12" stroke="#DE9A51" stroke-width="0.7"><line x1="140" y1="134" x2="140" y2="0"/><line x1="140" y1="134" x2="280" y2="60"/><line x1="140" y1="134" x2="280" y2="200"/><line x1="140" y1="134" x2="140" y2="260"/><line x1="140" y1="134" x2="0" y2="200"/><line x1="140" y1="134" x2="0" y2="60"/><line x1="140" y1="134" x2="220" y2="14"/><line x1="140" y1="134" x2="60" y2="14"/><line x1="140" y1="134" x2="270" y2="134"/><line x1="140" y1="134" x2="10" y2="134"/></g><circle cx="140" cy="134" r="115" fill="none" stroke="#DE9A51" stroke-width="0.5" opacity=".1"/><path d="M100 44 L110 30 L125 42 L140 26 L155 42 L170 30 L180 44 L180 52 L100 52 Z" fill="rgba(222,154,81,.13)" stroke="#DE9A51" stroke-width="1" opacity=".7"/><circle cx="140" cy="26" r="3.5" fill="#DE9A51" opacity=".8"/><circle cx="110" cy="30" r="2.5" fill="#DE9A51" opacity=".65"/><circle cx="170" cy="30" r="2.5" fill="#DE9A51" opacity=".65"/><rect x="40" y="268" width="200" height="1" fill="#DE9A51" opacity=".2"/><rect x="60" y="272" width="160" height="0.5" fill="#DE9A51" opacity=".12"/>' },
     { rune: '☼ ᛋᚨᚲᚱᛖᛞ ☼ ᚷᛖᛟ ☼', hex: '0x4D1B', svg: '<g fill="none" stroke="#DE9A51" opacity=".15" stroke-width="0.5"><circle cx="140" cy="134" r="120"/><circle cx="140" cy="14" r="120"/><circle cx="140" cy="254" r="120"/><circle cx="20" cy="134" r="120"/><circle cx="260" cy="134" r="120"/></g><path d="M120 40 L140 10 L160 40 Z" fill="rgba(222,154,81,.2)" stroke="#DE9A51" stroke-width="0.8" opacity=".8"/><circle cx="140" cy="25" r="3" fill="#DE9A51"/><rect x="20" y="268" width="240" height="1" fill="#DE9A51" opacity=".15"/>' },
     { rune: '✧ ᛉᛖᚾᛁᛏᚺ ✧ ᚨᛋᚲᛖᚾᛏ ✧', hex: '0x4D1C', svg: '<g stroke="#DE9A51" stroke-width="0.5" opacity=".12" fill="none"><polygon points="140,10 270,134 140,258 10,134"/><polygon points="140,30 250,134 140,238 30,134"/><polygon points="140,50 230,134 140,218 50,134"/></g><path d="M110 50 L140 15 L170 50 L140 35 Z" fill="rgba(222,154,81,.3)" stroke="#DE9A51" opacity=".9"/><circle cx="140" cy="134" r="110" fill="none" stroke="#DE9A51" stroke-width="0.5" stroke-dasharray="1 4" opacity=".2"/>' },
@@ -162,8 +163,36 @@ const SQUADS = [
   { name: 'Bitty', class: 'bitty', color: '#3498DB', level: 'Tier IV' },
   { name: 'Ritty', class: 'ritty', color: '#9884D5', level: 'Tier III' },
   { name: 'Ritualist', class: 'ritualist', color: '#5AFD8E', level: 'Tier II' },
-  { name: 'Ascendant Ritualist', class: 'ascendant', color: '#DE9A51', level: 'Tier I' }
+  { name: 'Radiant Ritualist', class: 'ascendant', color: '#DE9A51', level: 'Tier I' }
 ];
+
+const RITUAL_CHAIN_HEX = '0x7bb';
+const RITUAL_CHAIN_ID = 1979;
+const MINT_STORAGE_PREFIX = 'ritualize-minted-v1:';
+const NFT_CONTRACT_ADDRESS = (process.env.NEXT_PUBLIC_NFT_CONTRACT || '0x2ca8B7BC0F9020bC35d40be6530eAac04924B619') as string;
+const NFT_ABI = [
+  'function hasMinted(address) view returns (bool)',
+  'function profileOf(address) view returns ((string username,string role,string tokenURI,uint256 mintedAt,uint256 tokenId))',
+  'function mint(string username,string role,string uri) returns (uint256)'
+];
+const RITUAL_CHAIN_CONFIG = {
+  chainId: RITUAL_CHAIN_HEX,
+  chainName: 'Ritual Chain',
+  nativeCurrency: { name: 'RITUAL', symbol: 'RITUAL', decimals: 18 },
+  rpcUrls: ['https://rpc.ritualfoundation.org'],
+  blockExplorerUrls: ['https://explorer.ritualfoundation.org']
+};
+
+type MintRecord = {
+  wallet: string;
+  nickname: string;
+  userImage: string;
+  squadName: string;
+  templateNum: number;
+  fortune: string;
+  txHash: string;
+  mintedAt: number;
+};
 
 export default function App() {
   const [view, setView] = useState<'landing' | 'editor'>('landing');
@@ -173,7 +202,28 @@ export default function App() {
   const [templateNum, setTemplateNum] = useState<number>(0);
   const [rerollsLeft, setRerollsLeft] = useState<number>(0);
   const [fortune, setFortune] = useState<string>('');
+  const [walletAddress, setWalletAddress] = useState<string>('');
+  const [mintTxHash, setMintTxHash] = useState<string>('');
+  const [isConnectingWallet, setIsConnectingWallet] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [isMintedForWallet, setIsMintedForWallet] = useState<boolean>(false);
   const pfpRef = useRef<HTMLDivElement>(null);
+
+  const getStorageKey = (wallet: string) => `${MINT_STORAGE_PREFIX}${wallet.toLowerCase()}`;
+  const hasWallet = Boolean(walletAddress);
+  const isIdentityLocked = isMintedForWallet;
+  const getEvm = () => (window as any).ethereum;
+
+  const getReadContract = async () => {
+    const provider = new BrowserProvider(getEvm());
+    return new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
+  };
+
+  const getWriteContract = async () => {
+    const provider = new BrowserProvider(getEvm());
+    const signer = await provider.getSigner();
+    return new Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+  };
 
   const randomizeIdentity = () => {
     const roll = Math.random() * 100;
@@ -197,9 +247,109 @@ export default function App() {
     setFortune(randomFortune);
   };
 
+  const utf8ToHex = (value: string) => {
+    return `0x${Array.from(new TextEncoder().encode(value))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')}`;
+  };
+
+  const waitForReceipt = async (txHash: string) => {
+    const ethereum = (window as any).ethereum;
+    for (let i = 0; i < 60; i++) {
+      const receipt = await ethereum.request({
+        method: 'eth_getTransactionReceipt',
+        params: [txHash]
+      });
+      if (receipt) return receipt;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    throw new Error('Timed out waiting for transaction confirmation');
+  };
+
+  const loadMintRecord = (wallet: string) => {
+    const raw = localStorage.getItem(getStorageKey(wallet));
+    if (!raw) {
+      setIsMintedForWallet(false);
+      setMintTxHash('');
+      return;
+    }
+    try {
+      const record = JSON.parse(raw) as MintRecord;
+      const squad = SQUADS.find((s) => s.name === record.squadName);
+      if (!squad) return;
+      setNickname(record.nickname);
+      setUserImage(record.userImage);
+      setAssignedSquad(squad);
+      setTemplateNum(record.templateNum);
+      setFortune(record.fortune);
+      setMintTxHash(record.txHash);
+      setRerollsLeft(0);
+      setIsMintedForWallet(true);
+      setView('editor');
+    } catch {
+      setIsMintedForWallet(false);
+      setMintTxHash('');
+    }
+  };
+
+  const loadMintStateFromChain = async (wallet: string) => {
+    const contract = await getReadContract();
+    const minted = await contract.hasMinted(wallet);
+    if (!minted) {
+      setIsMintedForWallet(false);
+      setMintTxHash('');
+      return;
+    }
+    const profile = await contract.profileOf(wallet);
+    const squad = SQUADS.find((s) => s.name === profile.role);
+    if (squad) {
+      setAssignedSquad(squad);
+      setNickname(profile.username || '');
+      setTemplateNum(0);
+      setFortune('Your role is permanently bound to this wallet on Ritual Chain.');
+      setRerollsLeft(0);
+      setIsMintedForWallet(true);
+      setView('editor');
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      setIsConnectingWallet(true);
+      const ethereum = getEvm();
+      if (!ethereum) {
+        alert('No EVM wallet detected. Install MetaMask or a compatible wallet.');
+        return;
+      }
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      const wallet = accounts?.[0];
+      if (!wallet) return;
+
+      try {
+        await ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: RITUAL_CHAIN_HEX }]
+        });
+      } catch {
+        await ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [RITUAL_CHAIN_CONFIG]
+        });
+      }
+
+      setWalletAddress(wallet);
+      await loadMintStateFromChain(wallet);
+      loadMintRecord(wallet);
+    } catch (error) {
+      console.error('Wallet connection failed', error);
+    } finally {
+      setIsConnectingWallet(false);
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && nickname.trim()) {
+    if (file && nickname.trim() && hasWallet && !isIdentityLocked) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserImage(reader.result as string);
@@ -212,7 +362,7 @@ export default function App() {
   };
 
   const handleRerollClick = () => {
-    if (rerollsLeft > 0 && nickname.trim()) {
+    if (rerollsLeft > 0 && nickname.trim() && !isIdentityLocked) {
       randomizeIdentity();
       setRerollsLeft(prev => prev - 1);
     }
@@ -251,11 +401,55 @@ export default function App() {
     window.open(xUrl, '_blank');
   };
 
+  const mintOnRitual = async () => {
+    if (!walletAddress || !assignedSquad || !nickname.trim() || !userImage || isIdentityLocked) return;
+    try {
+      setIsMinting(true);
+      const ethereum = getEvm();
+      const chainHex = await ethereum.request({ method: 'eth_chainId' });
+      if (chainHex?.toLowerCase() !== RITUAL_CHAIN_HEX) {
+        throw new Error('Please switch wallet to Ritual Chain');
+      }
+      if (!NFT_CONTRACT_ADDRESS) {
+        throw new Error('Missing NEXT_PUBLIC_NFT_CONTRACT');
+      }
+      const contract = await getWriteContract();
+      const metadata = `data:application/json,${encodeURIComponent(JSON.stringify({
+        name: `Ritualize PFP - ${nickname.trim()}`,
+        description: `Role-bound identity on Ritual Chain`,
+        attributes: [{ trait_type: 'Role', value: assignedSquad.name }, { trait_type: 'Username', value: nickname.trim() }]
+      }))}`;
+      const tx = await contract.mint(nickname.trim(), assignedSquad.name, metadata);
+      const receipt = await tx.wait();
+      const txHash = receipt?.hash || tx.hash;
+      const record: MintRecord = {
+        wallet: walletAddress,
+        nickname: nickname.trim(),
+        userImage,
+        squadName: assignedSquad.name,
+        templateNum,
+        fortune,
+        txHash,
+        mintedAt: Date.now()
+      };
+      localStorage.setItem(getStorageKey(walletAddress), JSON.stringify(record));
+      setMintTxHash(txHash);
+      setIsMintedForWallet(true);
+      setRerollsLeft(0);
+    } catch (error) {
+      console.error('Mint failed', error);
+      alert('Mint transaction failed or was rejected.');
+    } finally {
+      setIsMinting(false);
+    }
+  };
+
   const currentTemplateData = assignedSquad 
     ? TEMPLATES_DB[assignedSquad.name as keyof typeof TEMPLATES_DB][templateNum] 
     : null;
 
   const isAliasMissing = !nickname.trim();
+  const uploadLocked = !hasWallet || isAliasMissing || isIdentityLocked;
 
   return (
     <>
@@ -343,29 +537,43 @@ export default function App() {
               <div className="relative w-full">
                 <input 
                   type="text"
-                  placeholder="DISCORD USERNAME (REQUIRED)"
+                  placeholder={hasWallet ? 'DISCORD USERNAME (REQUIRED)' : 'CONNECT WALLET FIRST'}
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   maxLength={16}
+                  disabled={!hasWallet || isIdentityLocked}
                   className="w-full bg-black/50 border border-zinc-700 hover:border-[#22c55e] text-white px-4 py-4 text-center font-bold tracking-widest uppercase focus:outline-none focus:border-[#22c55e] transition-colors placeholder:text-zinc-600"
                 />
               </div>
 
-              <div className={`relative w-full group ${!isAliasMissing ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+              <button
+                onClick={connectWallet}
+                disabled={isConnectingWallet || hasWallet}
+                className={`w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border ${
+                  hasWallet
+                    ? 'bg-emerald-700/20 border-emerald-500 text-emerald-300'
+                    : 'bg-zinc-900 border-zinc-700 text-white hover:bg-zinc-800'
+                }`}
+              >
+                {hasWallet ? <CheckCircle2 size={20} /> : <Wallet size={20} />}
+                {hasWallet ? `CONNECTED: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : (isConnectingWallet ? 'CONNECTING...' : 'CONNECT WALLET')}
+              </button>
+
+              <div className={`relative w-full group ${!uploadLocked ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
                 <input 
                   type="file" 
                   accept="image/*" 
-                  disabled={isAliasMissing}
+                  disabled={uploadLocked}
                   onChange={handleImageUpload}
-                  className={`absolute inset-0 w-full h-full z-10 ${!isAliasMissing ? 'cursor-pointer opacity-0' : 'hidden'}`}
+                  className={`absolute inset-0 w-full h-full z-10 ${!uploadLocked ? 'cursor-pointer opacity-0' : 'hidden'}`}
                 />
-                <div className={`w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all ${!isAliasMissing ? 'group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]' : ''}`}>
+                <div className={`w-full bg-[#22c55e]/10 border border-[#22c55e] text-[#22c55e] px-4 py-6 flex flex-col items-center justify-center gap-3 transition-all ${!uploadLocked ? 'group-hover:bg-[#22c55e]/20 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]' : ''}`}>
                   <UploadCloud size={32} />
                   <span className="font-bold text-lg tracking-wide uppercase">
-                    {!isAliasMissing ? 'Get the Carding Started' : 'Awaiting Username...'}
+                    {!hasWallet ? 'Connect Wallet First' : isIdentityLocked ? 'Identity Already Minted' : !isAliasMissing ? 'Get the Carding Started' : 'Awaiting Username...'}
                   </span>
                   <span className="text-sm opacity-70">
-                    {!isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Username to Unlock Upload'}
+                    {!hasWallet ? 'Wallet required before upload' : isIdentityLocked ? 'Role is locked for this wallet' : !isAliasMissing ? 'Upload Photo (JPG, PNG)' : 'Enter Username to Unlock Upload'}
                   </span>
                 </div>
               </div>
@@ -500,7 +708,7 @@ export default function App() {
                 <div className="space-y-2">
                   <button 
                     onClick={handleRerollClick}
-                    disabled={rerollsLeft === 0 || isAliasMissing}
+                    disabled={rerollsLeft === 0 || isAliasMissing || isIdentityLocked}
                     className={`w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border ${
                       rerollsLeft === 0 || isAliasMissing
                         ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
@@ -511,12 +719,36 @@ export default function App() {
                     {rerollsLeft === 0 ? 'OUT OF REROLLS' : `REROLL IDENTITY (${rerollsLeft} LEFT)`}
                   </button>
                   <p className="text-xs text-center text-zinc-500">
-                    {rerollsLeft === 0 ? 'Your identity has been locked.' : 'Might spawn a lower rank.'}
+                    {isIdentityLocked ? 'Role locked after mint for this wallet.' : rerollsLeft === 0 ? 'Your identity has been locked.' : 'Might spawn a lower rank.'}
                   </p>
                 </div>
               </div>
 
               <div className="p-6 border-t border-zinc-800 bg-zinc-950 flex flex-col gap-3">
+                <button
+                  onClick={mintOnRitual}
+                  disabled={isAliasMissing || !hasWallet || !assignedSquad || !userImage || isIdentityLocked || isMinting}
+                  className={`w-full py-4 font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
+                    isAliasMissing || !hasWallet || !assignedSquad || !userImage || isIdentityLocked || isMinting
+                      ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                  }`}
+                >
+                  <Wallet size={20} />
+                  {isIdentityLocked ? 'MINTED (LOCKED)' : isMinting ? 'MINTING ON RITUAL...' : 'MINT ON RITUAL TESTNET'}
+                </button>
+
+                {mintTxHash && (
+                  <a
+                    href={`https://explorer.ritualfoundation.org/tx/${mintTxHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-emerald-300 underline text-center break-all"
+                  >
+                    View mint tx: {mintTxHash}
+                  </a>
+                )}
+
                 <button 
                   onClick={exportPFP}
                   disabled={isAliasMissing}
