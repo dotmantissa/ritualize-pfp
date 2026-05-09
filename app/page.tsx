@@ -208,6 +208,7 @@ export default function App() {
   const [mintTxHash, setMintTxHash] = useState<string>('');
   const [isConnectingWallet, setIsConnectingWallet] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [isRerolling, setIsRerolling] = useState<boolean>(false);
   const [isMintedForWallet, setIsMintedForWallet] = useState<boolean>(false);
   const pfpRef = useRef<HTMLDivElement>(null);
   const providerRef = useRef<BrowserProvider | null>(null);
@@ -370,6 +371,7 @@ export default function App() {
   const handleRerollClick = async () => {
     if (rerollsLeft <= 0 || !nickname.trim() || isIdentityLocked) return;
     try {
+      setIsRerolling(true);
       const contract = await getWriteContract();
       const tx = await contract.consumeReroll({ gasLimit: 140000 });
       await tx.wait();
@@ -388,6 +390,8 @@ export default function App() {
     } catch (error) {
       console.error('Reroll failed', error);
       alert('Reroll failed or was rejected.');
+    } finally {
+      setIsRerolling(false);
     }
   };
 
@@ -534,6 +538,8 @@ export default function App() {
         .card-header { position: absolute; top: 38px; left: 0; width: 100%; height: 26px; display: flex; align-items: center; justify-content: center; gap: 6px; z-index: 4; text-align: center; }
         .card-header-logo { height: 14px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.8; }
         .card-header-text { font-family: 'Cinzel Decorative', serif; font-size: 12px; font-weight: 700; color: var(--c); text-shadow: 0 0 10px var(--glow); text-transform: uppercase; letter-spacing: 0.05em; }
+        .btn-spinner { width: 16px; height: 16px; border-radius: 9999px; border: 2px solid currentColor; border-top-color: transparent; animation: spin 0.9s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}} />
 
       {/* VIEW 1: LANDING PAGE */}
@@ -731,15 +737,15 @@ export default function App() {
                 <div className="space-y-2">
                   <button 
                     onClick={handleRerollClick}
-                    disabled={rerollsLeft === 0 || isAliasMissing || isIdentityLocked}
+                    disabled={rerollsLeft === 0 || isAliasMissing || isIdentityLocked || isRerolling}
                     className={`w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 transition-all border ${
-                      rerollsLeft === 0 || isAliasMissing
+                      rerollsLeft === 0 || isAliasMissing || isRerolling
                         ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
                         : 'bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
                     }`}
                   >
-                    <Dices size={20} />
-                    {rerollsLeft === 0 ? 'OUT OF REROLLS' : `REROLL IDENTITY (${rerollsLeft} LEFT)`}
+                    {isRerolling ? <span className="btn-spinner" /> : <Dices size={20} />}
+                    {isRerolling ? 'AWAITING WALLET SIGNATURE...' : rerollsLeft === 0 ? 'OUT OF REROLLS' : `REROLL IDENTITY (${rerollsLeft} LEFT)`}
                   </button>
                   <p className="text-xs text-center text-zinc-500">
                     {isIdentityLocked ? 'Role locked after mint for this wallet.' : rerollsLeft === 0 ? 'Your identity has been locked.' : 'Might spawn a lower rank.'}
